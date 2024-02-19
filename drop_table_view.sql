@@ -1,4 +1,4 @@
-
+-- how to drop a view if already exists before creating from the scratch
 Use db
 GO
 
