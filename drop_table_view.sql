@@ -9,7 +9,7 @@ DROP VIEW [tmp].[vw_details]
 GO
 
 
-CREATE VIEW [tmp].[vw_details]] AS
+CREATE VIEW [tmp].[vw_details] AS
 
 
 -- code goes here after improment
