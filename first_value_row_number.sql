@@ -1,0 +1,2 @@
+	  --, FIRST_VALUE(date_out) over (partition by p.[person_code] order by p.[date_out] desc) as true_date_out
+	  --, ROW_NUMBER() over (partition by p.[person_code] order by p.[date_out] desc) AS R_N
