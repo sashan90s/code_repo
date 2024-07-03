@@ -1,0 +1,12 @@
+drop table dbo.PipelineLog;
+drop table dbo.SourceToTargetMetadata;
+drop table dbo.DataObjectMetadata;
+drop table dbo.Batch;
+drop table dob.BatchRun;
+drop table dbo.EmailRecipients;
+drop table dbo.SystemInfo;
+drop view dbo.SourceToTargetView;
+drop proc dbo.InsertPipelineLog;
+drop proc dbo.GetSourceToTargetInfo;
+drop proc dbo.GetEmailAddresses;
+drop proc dbo.GetRunID;
