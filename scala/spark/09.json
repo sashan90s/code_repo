@@ -1,0 +1,26 @@
+{
+    "orderId":"O1",
+    "category":"Laptop",
+    "quantity":100
+}
+
+
+{
+    "orderId":"O2",
+    "category":"Mobiles",
+    "quantity":200
+}
+
+
+{
+    "orderId":"O3",
+    "category":"Desktop",
+    "quantity":75
+}
+
+
+{
+    "orderId":"O4",
+    "category":"Laptop",
+    "quantity":25
+}
