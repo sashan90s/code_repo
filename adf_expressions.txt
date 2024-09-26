@@ -1,0 +1,5 @@
+-- we are trying to get a certain column when it is not null and 
+-- then we are formatting the column
+-- this is for the azure data factory expression language
+
+if(equals(item()?['[Date In]'], null), item()?['[Date In]'], formatDateTime(item()?['[Date In]'], 'dd-MMM-yy'))
