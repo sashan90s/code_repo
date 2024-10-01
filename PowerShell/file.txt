@@ -1,4 +1,0 @@
-I am the best PowerShell Programmer you will see. 
-Like it or hate it,
-I had to learn PowerShell the hardest way
-
