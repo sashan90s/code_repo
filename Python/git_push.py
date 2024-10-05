@@ -1,7 +1,7 @@
 
 import subprocess
-
-
+import sys
+msg1 = sys.argv[1]
 def grun_shell(command):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
 
@@ -19,5 +19,5 @@ def git(msg):
     grun_shell(cmd2)
     grun_shell(cmd3)
 
-git('test')
+git(msg1)
 
