@@ -1,7 +1,11 @@
 
 import subprocess
 import sys
+#setting a variable and then converting it into an argument to pass
 msg1 = sys.argv[1]
+
+#defining the function that takes a command/script to execute on powershell
+#replacing the try and exception with if...else... to give us message if the command 
 def grun_shell(command):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
 
@@ -21,3 +25,4 @@ def git(msg):
 
 git(msg1)
 
+#python git_push.py "test1"
