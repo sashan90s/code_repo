@@ -1,0 +1,85 @@
+#Implementing Exceptions
+
+With CTEexcep as 
+
+(
+Select 
+
+		[Employee ID]
+      ,[Staff ID]
+      ,[Staff Name]
+      ,[Staff Role]
+      ,[Employee Work Email]
+      ,[Manager Employee ID]
+      ,[Manager Work Email]
+      ,[Manager Name]
+      ,[Staff Region]
+      ,[Group Directorate]
+      ,[Remit]
+      ,[Team]
+      ,[Sub Team]
+     	,[Exception] = 
+	  CASE WHEN  [Employee Work Email] IN ('joel.armstrong@ofsted.gov.uk', 'deborah.hayward@ofsted.gov.uk') 
+			THEN 'Exception'
+		ELSE ''
+		END
+  FROM [DATAMART].[dbo].[vw_rls_SDSQL]
+
+)
+
+Select * from CTEexcep
+
+
+#Give access to everyting to people in the exception
+
+VAR CurrentUser = USERPRINCIPALNAME()
+VAR IsException = 
+    CALCULATE(
+        COUNTROWS(all_staff_SQL_VW), 
+        FILTER(all_staff_SQL_VW, And(all_staff_SQL_VW[Exception] = "Exception", all_staff_SQL_VW[Employee Work Email]= CurrentUser))) > 0
+RETURN
+IF(IsException, TRUE(),
+        CALCULATE(COUNTROWS(all_staff_SQL_VW), OR(all_staff_SQL_VW[Manager Work Email] = CurrentUser, all_staff_SQL_VW[Employee Work Email]= CurrentUser)) > 0 )
+
+
+
+
+#Give access to only the group of people to their related data
+
+VAR CurrentUser = USERPRINCIPALNAME()
+VAR UserSubteams = 
+    LOOKUPVALUE(all_staff_SQL_VW[Sub Team], 
+    all_staff_SQL_VW[Employee Work Email], CurrentUser
+    )
+
+RETURN
+all_staff_SQL_VW[Sub Team] == UserSubteams
+
+
+
+#Give access to only the group of people to their related data and give access to everything to the people in the exception list
+VAR CurrentUser = USERPRINCIPALNAME()
+
+VAR UserSubteams = 
+    LOOKUPVALUE(all_staff_SQL_VW[Sub Team], 
+    all_staff_SQL_VW[Employee Work Email], CurrentUser
+    )
+
+VAR IsException = 
+    CALCULATE(
+        COUNTROWS(all_staff_SQL_VW), 
+        FILTER(all_staff_SQL_VW, And(all_staff_SQL_VW[Exception] = "Exception", all_staff_SQL_VW[Employee Work Email]= CurrentUser))) > 0
+RETURN
+IF (
+    IsException,
+    TRUE(),
+    CALCULATE(
+        COUNTROWS(all_staff_SQL_VW),
+        all_staff_SQL_VW[Sub Team] == UserSubteams
+    ) > 0
+)
+
+
+
+
+
