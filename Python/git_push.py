@@ -10,14 +10,14 @@ def grun_shell(command):
     else:
         print("Command execution failed", result.stderr)
 
-def git(msg, branch):
+def git(msg):
     cmd1 = "git add --all"
     cmd2 = f"git commit -m {msg}"
-    cmd3 = f"git push {branch}"
+    cmd3 = f"git push"
 
     grun_shell(cmd1)
     grun_shell(cmd2)
     grun_shell(cmd3)
-    
-git('test', 'main')
+
+git('test')
 
