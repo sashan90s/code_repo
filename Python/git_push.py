@@ -8,7 +8,7 @@ msg1 = sys.argv[1]
 #replacing the try and exception with if...else... to give us message if the command 
 def grun_shell(command):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result.stdout)
+
     if result.returncode == 0:
         print("Command executed successfully.", result.stdout)
     else:
