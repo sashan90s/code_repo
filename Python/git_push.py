@@ -16,7 +16,7 @@ def grun_shell(command):
 
 def git(msg):
     cmd1 = "git add --all"
-    cmd2 = f"git commit -m {msg}"
+    cmd2 = f'git commit -m "{msg}"'
     cmd3 = f"git push"
 
     grun_shell(cmd1)
@@ -26,3 +26,4 @@ def git(msg):
 git(msg1)
 
 #python git_push.py "test1"
+# changing test
