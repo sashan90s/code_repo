@@ -13,3 +13,7 @@ services:
         - './data:/var/opt/mssql/data'
         - './log:/var/opt/mssql/log'
         - './secrets:/var/opt/mssql/secrets'
+
+
+
+#mcr.microsoft.com/azure-sql-edge
