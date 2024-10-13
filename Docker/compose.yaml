@@ -1,0 +1,15 @@
+version: '3.8'
+ 
+services:
+  sqldata:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+        - SA_PASSWORD=Pass@word
+        - ACCEPT_EULA=Y
+    container_name: sqlserver-tracer
+    ports:
+        - "1433:1433"
+    volumes:
+        - './data:/var/opt/mssql/data'
+        - './log:/var/opt/mssql/log'
+        - './secrets:/var/opt/mssql/secrets'
