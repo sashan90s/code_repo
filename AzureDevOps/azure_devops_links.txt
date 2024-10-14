@@ -1,0 +1,8 @@
+# for defining yaml schema
+https://learn.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/?view=azure-pipelines
+
+# for degining tasks
+https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/?view=azure-pipelines
+
+# system defined variable for azure devops
+https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml
