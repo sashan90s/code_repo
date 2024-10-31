@@ -1,0 +1,2 @@
+# how to enable access to azure services using microsoft entra id
+https://learn.microsoft.com/en-us/azure/data-factory/enable-aad-authentication-azure-ssis-ir

@@ -1,0 +1,19 @@
+# Use official dbt image as base
+FROM fishtownanalytics/dbt:1.7.3
+
+# Set working directory
+WORKDIR /usr/app/dbt
+
+# Copy dbt project files
+COPY profiles.yml /root/.dbt/
+COPY . .
+
+# Install any additional dependencies
+RUN pip install --no-cache-dir dbt-sqlserver>=1.7.0 azure-cli
+
+# Set environment variables (these will be overridden by Azure Pipeline variables)
+ENV DBT_PROFILES_DIR=/root/.dbt \
+    DBT_TARGET=dev
+
+# Default command
+CMD ["dbt", "run"]

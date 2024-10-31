@@ -1,0 +1,12 @@
+# steps for creating the for each loop in SSISClass
+
+1. Create a Control Flow and take a for each container
+2. Edit the for each container an enumerator option. we select file enumerator here, okay?
+3. Create a variable 
+4. BACK TO for each loop container and go to edit, then Variable mapping tab to map the variable you created to 
+store file path
+5. go into the data flow and take a flat file source. in the flat file source, create a conneciton manager to the 
+source file. This will be parameterised
+6. After getting this parameterised, change the connection manager connectionstring from that connection manager>property>expression> ...
+
+read more on this: https://learn.microsoft.com/en-us/sql/integration-services/control-flow/foreach-loop-container?view=sql-server-ver16

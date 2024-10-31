@@ -1,0 +1,2 @@
+#dynamic file name
+"C:\\SSISClass\\Module Resources\\Module4\\Product List"  +  (DT_WSTR, 10) (DT_DBDATE) GETDATE()  +  ".txt"

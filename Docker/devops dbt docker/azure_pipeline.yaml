@@ -1,0 +1,48 @@
+trigger:
+  - main
+
+variables:
+  containerRegistry: 'your-azure-container-registry'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  imageRepository: 'dbt-project'
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  jobs:
+  - job: BuildandPush
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Docker@2
+      inputs:
+        containerRegistry: '$(containerRegistry)'
+        repository: '$(imageRepository)'
+        command: 'buildAndPush'
+        Dockerfile: '$(dockerfilePath)'
+        tags: |
+          $(tag)
+          latest
+
+- stage: Deploy
+  jobs:
+  - job: RunDBT
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Docker@2
+      inputs:
+        containerRegistry: '$(containerRegistry)'
+        command: 'login'
+    
+    - script: |
+        docker run \
+          -e DBT_TARGET=$(DBT_TARGET) \
+          -e DBT_AZURE_SERVER=$(DBT_AZURE_SERVER) \
+          -e DBT_DATABASE=$(DBT_DATABASE) \
+          -e DBT_SCHEMA=$(DBT_SCHEMA) \
+          -e DBT_USER=$(DBT_USER) \
+          -e DBT_PASSWORD=$(DBT_PASSWORD) \
+          $(containerRegistry)/$(imageRepository):$(tag) \
+          dbt run --profiles-dir /root/.dbt
+      displayName: 'Run dbt models'
