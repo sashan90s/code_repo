@@ -1,6 +1,6 @@
 
 
-
+-- loading into the dim tables
 
 
 

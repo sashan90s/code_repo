@@ -1,0 +1,14 @@
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- psudo coding for dimensional loading in adf                                                                                                  ||||||||SIBBIR SIHAN COPYRIGHT|||||||
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+get source data. 
+add a hashing column to source data
+if source.hashvalue = target.hashvalue 
+	Ignore Load where source.hashvalue = target.hashvalue
+if source.hashvalue <> target.hashvalue
+	check source.primaryID = target.primaryID
+		update data end data in target where source.primaryID = target.primaryID
+		insert new row in target where source.primaryID <> target.primaryID # completely new data
+		increment the Surrogate Key using Max(SK)+1
+			

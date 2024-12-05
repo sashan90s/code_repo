@@ -1,0 +1,167 @@
+-- for on prem sql server
+
+
+1. Creating the sql Credential
+
+/* another way (you could also do this graphically)
+Example:
+USE master
+CREATE CREDENTIAL [https://msfttutorial.blob.core.windows.net/containername]
+WITH IDENTITY='SHARED ACCESS SIGNATURE'
+, SECRET = 'sharedaccesssignature'
+GO */
+
+2. Using the credential to take the backup
+Backup-SqlDatabase -ServerInstance "Computer\Instance" -Database "MainDB" -BackupContainer "https://storageaccountname.blob.core.windows.net/containername" -SqlCredential "SQLCredentialName"
+
+-- for azure sql server from any Cloud Computer
+
+1. Install azure cli module:
+Install-Module -Name Az -AllowClobber -Scope CurrentUser
+
+2. install SqlServer az module:
+Install-Module -Name SqlServer -AllowClobber -Scope CurrentUser
+
+3. connect to AzAccount:
+Connect-AzAccount
+
+4. Configure Variables and Credentials:
+# Define variables for the resource names
+$ResourceGroupName = "MyResourceGroup"
+$ServerName = "MySqlServer"
+$DatabaseName = "MyDatabase"
+$StorageAccountName = "MyStorageAccount"
+$ContainerName = "backup-container"
+$BacpacFileName = "MyDatabase.bacpac"
+$VaultName = "MyKeyVault"
+$SecretName = "SqlAdminPassword"
+
+
+# Retrieve the storage account key
+$StorageAccountKey = (Get-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName)[0].Value
+
+# Create a storage context
+$StorageContext = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey $StorageAccountKey
+
+# Construct the URI for the .bacpac file
+$BacpacUri = "https://$StorageAccountName.blob.core.windows.net/$ContainerName/$BacpacFileName"
+
+# Retrieve the SQL admin password from Azure Key Vault
+$AdminPassword = Get-AzKeyVaultSecret -VaultName $VaultName -Name $SecretName | Select-Object -ExpandProperty SecretValueText
+
+# Create a PSCredential object for SQL admin
+$creds = New-Object -TypeName PSCredential -ArgumentList "sqladmin", (ConvertTo-SecureString $AdminPassword -AsPlainText -Force)
+
+
+5. There are two ways to go about it, You can use powershell or you can use azure cli module
+
+
+## If using powershell--
+5.i) use the following code first to set the credentials for logging into azure sql:
+
+# Prompt for SQL admin credentials (manual entry)
+$creds = Get-Credential
+
+You can also use azure keyvalt and get from there using the following code
+$AdminPassword = Get-AzKeyVaultSecret -VaultName "MyKeyVault" -Name "SqlAdminPassword" | Select-Object -ExpandProperty SecretValueText
+$creds = New-Object -TypeName PSCredential -ArgumentList "sqladmin", (ConvertTo-SecureString $AdminPassword -AsPlainText -Force)
+
+
+5.ii) now use the following code for executing commands to export
+
+# Export the database to a .bacpac file
+$exportRequest = New-AzSqlDatabaseExport `
+    -ResourceGroupName $ResourceGroupName `
+    -ServerName $ServerName `
+    -DatabaseName $DatabaseName `
+    -StorageKeytype "StorageAccessKey" `
+    -StorageKey $StorageAccountKey `
+    -StorageUri $BacpacUri `
+   # -AuthenticationType "ADPassword"
+    -AdministratorLogin $creds.UserName ` -- this will change if the authentification type is ADPassword
+    -AdministratorLoginPassword $creds.GetNetworkCredential().Password
+
+# Output the export request status
+$exportRequest
+
+
+## if using az cli
+
+Step 1: Configure an Azure Service Connection
+Go to Azure DevOps Project:
+
+Navigate to your Azure DevOps project.
+Create a Service Connection:
+
+Go to Project Settings > Service Connections.
+Click New Service Connection and select Azure Resource Manager.
+Choose the Service Principal (Automatic) option (recommended for ease).
+Grant the required permissions to the Service Principal.
+Name the Service Connection:
+
+Give it a meaningful name (e.g., AzureServiceConnection).
+
+
+
+
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  ResourceGroup: "<resource-group>"
+  ServerName: "<server-name>"
+  DatabaseName: "<database-name>"
+  StorageUri: "https://<storage-account>.blob.core.windows.net/<container>/sampleDB.bacpac"
+  StorageKeyType: "StorageAccessKey"
+
+steps:
+# Step 1: Retrieve storage key from Key Vault
+- task: AzureKeyVault@2
+  inputs:
+    azureSubscription: 'AzureServiceConnection' # Replace with your service connection name
+    KeyVaultName: '<key-vault-name>' # Replace with your Azure Key Vault name
+    SecretsFilter: 'StorageAccountKey' # Replace with your secret names
+    RunAsPreJob: false
+
+# Step 2: Use Azure AD authentication for Azure SQL Database export
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'AzureServiceConnection' # Replace with your service connection name
+    scriptType: 'bash' # Use 'bash' for cross-platform support
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      storageKey=$(StorageAccountKey)
+      
+      az account show # Confirm Azure AD authentication
+      az sql db export -g "$(ResourceGroup)" -s "$(ServerName)" -n "$(DatabaseName)" \
+        --auth-type "ADToken" \
+        --storage-key-type "$(StorageKeyType)" \
+        --storage-key "$storageKey" \
+        --storage-uri "$(StorageUri)"
+
+
+Step 3: Grant Necessary Azure Permissions to the Service Principal
+Ensure the Service Principal linked to the service connection has appropriate permissions:
+
+Go to the Azure Portal.
+Navigate to your resource group or subscription.
+Select Access Control (IAM) > Add Role Assignment.
+Assign a role like Contributor or SQL DB Contributor to the Service Principal.
+
+
+Step 4: Use the Service Principal ID in Your Pipeline
+Once you have the Service Principal Object ID, you can use it in SQL commands to grant access to the Azure SQL Database:
+sql
+Copy code
+CREATE USER [your-service-principal-id] FROM EXTERNAL PROVIDER;
+ALTER ROLE db_backupoperator ADD MEMBER [your-service-principal-id];
+
+Key Considerations:
+
+https://learn.microsoft.com/en-us/azure/azure-sql/database/database-export?view=azuresql#considerations
+
+How to setup service principal and connect it to azure database:
+https://learn.microsoft.com/en-us/answers/questions/1665352/how-to-create-service-principal-link-to-the-azure

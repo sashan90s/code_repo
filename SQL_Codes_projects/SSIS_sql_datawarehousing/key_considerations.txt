@@ -1,0 +1,7 @@
+# data warehouse data loading and other considerations
+
+- Load dimensions first
+- Inferred member support is used to tackle data that is arriving late in the dimension. (problem with dimension loading)
+- Purpose of the fact Table is to return the surrogate key based on the Business Key of the dimension table
+- Fact Table is just bunch of foreign key 
+- fact table load most current data
