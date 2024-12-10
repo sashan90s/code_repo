@@ -1,0 +1,55 @@
+dontnetsg's video
+You can watch it full or you can skip to 28 minuites
+https://www.youtube.com/watch?v=KgMCBDDO9WE
+https://cuteprogramming.blog/2022/04/29/unit-test-stored-procedures-and-automate-build-deploy-test-azure-sql-database-changes-with-ci-cd-pipelines/
+
+You can also read my post for the entire post (I have not used MSbuild task)
+https://sihan.hashnode.dev/azure-devops-automated-cicd-pipeline-with-sql-server-git-integration
+
+
+Note: 
+1. If your solution includes a test project, you have to use a visual stidio build task,
+ You have to use something like VsTest task like the following:
+2. Add a test task to the build pipeline
+3. Add a publish test result task (Test results are saved in $(Agent.TempDirectory)\TestResults)
+4. Use a replace token task to replace the database string in the app.config file.
+   use example like: ApiUrl:"#{ApiUrl}#" or ConnectionString="#{TestDbCoreConnection}#"
+
+# Example
+- task: VSTest@3
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: |
+      **\*test*.dll
+      !**\*TestAdapter.dll
+      !**\obj\**
+
+
+If you are using the guideline from the video, make sure you are using the following msbuild ArgumentList
+After that, we move on to the third task in the pipeline which is building our Solution in Release mode with the following MSBuild Arguments on Any CPU.
+
+/p:DeployOnBuild=true 
+/p:WebPublishMethod=Package
+/p:PackageAsSingleFile=true 
+/p:SkipInvalidConfigurations=true 
+/p:PackageLocation="$(build.artifactstagingdirectory)\\"
+
+
+
+In case you want to build and publish to a test database right away, you can use the following MSbuild Argument
+/t:build;publish /p:CmdLineInMemoryStorage=True /p:SqlPublishProfilePath="Adventureworksunittest.publish.xml"
+
+
+
+
+
+
+
+
+Other helpful resources on the topic:
+https://youtu.be/m1n5DIV9oVg
+
+Method 2: https://www.youtube.com/watch?v=t3Lc9LRDZQ4&t=698s
+
+
+
