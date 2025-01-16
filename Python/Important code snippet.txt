@@ -1,0 +1,39 @@
+Invoke-RestMethod -Uri "http://ifconfig.me".Trim()
+
+--start
+
+Login-AzAccount
+Get-AzSubscription
+Set-AzContext -SubscriptionId "yourSubscriptionID"
+
+$RGname="sfclustertutorialgroup"
+$port=8081
+$rulename="allowAppPort$port"
+$nsgname="sf-vnet-security"
+
+# Get the NSG resource
+$nsg = Get-AzNetworkSecurityGroup -Name $nsgname -ResourceGroupName $RGname
+
+# Add the inbound security rule.
+$nsg | Add-AzNetworkSecurityRuleConfig -Name $rulename -Description "Allow app port" -Access Allow -Protocol * -Direction Inbound -Priority 3891 -SourceAddressPrefix "*" -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange $port
+
+# Update the NSG.
+$nsg | Set-AzNetworkSecurityGroup
+
+--end
+
+
+
+Get-AzNetworkSecurityGroup -Name nsg1 -ResourceGroupName rg1 | 
+Add-AzNetworkSecurityRuleConfig -Name rdp-rule -Description "Allow RDP" -Access `
+    Allow -Protocol Tcp -Direction Inbound -Priority 100 -SourceAddressPrefix Internet `
+    -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 3389 |
+    Set-AzNetworkSecurityGroup
+
+-- Using powershell azure
+New-AzSqlServerFirewallRule -ResourceGroupName "myResourceGroup" -ServerName $servername -FirewallRuleName "ContosoIPRange" -StartIpAddress "192.168.1.0" -EndIpAddress "192.168.1.255"
+
+--AZ Cli
+az sql server firewall-rule create --resource-group myResourceGroup --server $servername -n ContosoIPRange --start-ip-address 192.168.1.0 --end-ip-address 192.168.1.255
+
+
