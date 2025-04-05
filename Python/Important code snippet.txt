@@ -2,14 +2,27 @@ Invoke-RestMethod -Uri "http://ifconfig.me".Trim()
 
 --start
 
+
+$my_ip = Invoke-RestMethod -Uri "http://ifconfig.me".Trim()
+
+Write-Output $my_ip
+
 Login-AzAccount
 Get-AzSubscription
 Set-AzContext -SubscriptionId "yourSubscriptionID"
 
-$RGname="sfclustertutorialgroup"
+$RGname="Live"
 $port=8081
-$rulename="allowAppPort$port"
-$nsgname="sf-vnet-security"
+$rulename="SibbirSihan"
+$nsgname="nsg-diis-live-managedinstance"
+
+
+
+
+Get-AzNetworkSecurityGroup -Name $nsgname -ResourceGroupName $RGname | 
+Add-AzNetworkSecurityRuleConfig -Name $rulename -Description "Allow DE Computer" -Access "Allow" -Protocol "Tcp" -Direction "Inbound" -Priority 1016 -SourceAddressPrefix $my_ip -SourcePortRange "*" -DestinationAddressPrefix "*" -DestinationPortRange "3342" | Set-AzNetworkSecurityGroup
+
+
 
 # Get the NSG resource
 $nsg = Get-AzNetworkSecurityGroup -Name $nsgname -ResourceGroupName $RGname
@@ -19,9 +32,9 @@ $nsg | Add-AzNetworkSecurityRuleConfig -Name $rulename -Description "Allow app p
 
 # Update the NSG.
 $nsg | Set-AzNetworkSecurityGroup
-
 --end
 
+1f4a5522-5f5a-4974-8d95-9a032f4cf2e5
 
 
 Get-AzNetworkSecurityGroup -Name nsg1 -ResourceGroupName rg1 | 
