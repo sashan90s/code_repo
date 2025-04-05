@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DE Development Process Framework</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .stage {
+            font-weight: bold;
+        }
+        .important-comments {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>DE Development Process Framework</h1>
+    <table>
+        <tr>
+            <th>Stage</th>
+            <th>Considerations</th>
+            <th>StartDate</th>
+            <th>EndDate</th>
+            <th>Important Comments</th>
+        </tr>
+        <tr>
+            <td class="stage">Sandboxing</td>
+            <td>Branches Created:<br>
+                Pull Requests (PR) Created:<br>
+                Expected Days:<br>
+                Actual Days:
+            </td>
+            <td>[Date]</td>
+            <td>[Date]</td>
+            <td class="important-comments">Here, actual development begins in a controlled, isolated environment for experimentation. Ensure version control practices are followed, and changes are incrementally tested.</td>
+        </tr>
+        <tr>
+            <td class="stage">Estimation</td>
+            <td># of datasets = <br>
+                # of tables to create = <br>
+                # of stored procs to create = <br>
+                # of tables to update = <br>
+                # of stored procs to update = <br>
+                # of tests to create = <br>
+                # of tests to update = <br>
+                # of pipelines to create in ADF = <br>
+                # of pipeline to be updated in ADF = <br>
+                # of other considerations = <br>
+                # days required =
+            </td>
+            <td>[Date + 2 days]</td>
+            <td>[Date + 5 days]</td>
+            <td class="important-comments">In the second day of development, we give an original estimation. However, estimations will change couple of days later as the developer spends more time at the sandboxing stage.</td>
+        </tr>
+        <tr>
+            <td class="stage">Dev Testing<br>(Dev Deployment)</td>
+            <td>Tests Run:<br>
+                Issues Identified:<br>
+                Days Spent:
+            </td>
+            <td>[Date + 5 days]</td>
+            <td>[Date + 8 days]</td>
+            <td class="important-comments">Allocate at least 3 days for thorough testing of the development work. This includes unit testing, integration testing, and data validation to catch errors before moving to live environments.</td>
+        </tr>
+        <tr>
+            <td class="stage">Live Testing<br>(Live Deployment)</td>
+            <td>Tests Run:<br>
+                Issues Identified:<br>
+                Days Spent:
+            </td>
+            <td>[Date + 8 days]</td>
+            <td>[Date + 9 days]</td>
+            <td class="important-comments">Another 1 day for live testing that mirrors the live branch as closely as possible. This stage is for final validation before release.</td>
+        </tr>
+        <tr>
+            <td class="stage">Release</td>
+            <td>Deployment Date:<br>
+                Post-Release Issues:
+            </td>
+            <td>[Date + 9 days]</td>
+            <td>[Date + 10 days]</td>
+            <td class="important-comments">Ensure all testing is completed, and a rollback plan is in place in case of unexpected issues post-release.</td>
+        </tr>
+    </table>
+</body>
+</html>

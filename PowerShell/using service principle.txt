@@ -1,0 +1,3 @@
+How to use service pricipal with powershell:
+
+https://www.youtube.com/watch?v=APLvVUE_pSk

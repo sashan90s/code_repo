@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DE Development Process Flowchart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+        .flowchart {
+            width: 80%;
+            max-width: 800px;
+            text-align: center;
+        }
+        .stage {
+            display: inline-block;
+            width: 150px;
+            height: 50px;
+            line-height: 50px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            margin: 20px;
+            position: relative;
+        }
+        .stage::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            top: 50%;
+            right: -20px;
+            transform: translateY(-50%);
+        }
+        .stage:last-child::after {
+            display: none;
+        }
+        .concurrency {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .concurrency::before, .concurrency::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+        }
+        .concurrency::before {
+            left: -20px;
+        }
+        .concurrency::after {
+            right: -20px;
+        }
+        .concurrency-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: #4CAF50;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .concurrency .stage {
+            margin: 0 10px;
+        }
+        .arrow {
+            position: relative;
+            width: 50px;
+            height: 2px;
+            background-color: #4CAF50;
+            top: 25px;
+            margin: 0 auto;
+        }
+        .arrow::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #4CAF50;
+            right: -10px;
+            top: -5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="flowchart">
+        <div class="stage">Start</div>
+        <div class="arrow"></div>
+        <div class="concurrency">
+            <div class="stage">Sandboxing</div>
+            <div class="stage">Estimation</div>
+            <div class="concurrency-line"></div>
+        </div>
+        <div class="arrow"></div>
+        <div class="stage">Dev Testing</div>
+        <div class="arrow"></div>
+        <div class="stage">Live Testing</div>
+        <div class="arrow"></div>
+        <div class="stage">Release</div>
+        <div class="arrow"></div>
+        <div class="stage">End</div>
+    </div>
+</body>
+</html>
