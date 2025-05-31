@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DE Development Process Gantt Chart - 3 Weeks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .gantt-chart {
+            width: 100%;
+            max-width: 2100px;
+            border-collapse: collapse;
+            margin: auto;
+        }
+        .gantt-chart th, .gantt-chart td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .gantt-chart th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .gantt-chart .stage {
+            width: 200px;
+        }
+        .gantt-chart .timeline {
+            position: relative;
+            width: 2100px; /* Adjusted for 21 days */
+        }
+        .gantt-chart .bar {
+            height: 20px;
+            background-color: #2196F3;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 4px;
+        }
+        .gantt-chart .bar.concurrent {
+            background-color: #FF9800;
+        }
+        .gantt-chart .bar::after {
+            content: attr(data-label);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translate(5px, -50%);
+            background-color: #2196F3;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .gantt-chart .bar.concurrent::after {
+            background-color: #FF9800;
+        }
+        /* Day markers */
+        .gantt-chart .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: repeating-linear-gradient(to right, transparent, transparent 99px, #000 100px, #000 101px);
+            opacity: 0.1;
+            z-index: -1;
+        }
+        .gantt-chart .timeline div.day {
+            position: absolute;
+            top: -20px;
+            width: 1px;
+            height: 20px;
+            background-color: #000;
+        }
+        .gantt-chart .timeline div.day::after {
+            content: attr(data-day);
+            position: absolute;
+            top: -25px;
+            left: -10px;
+            font-size: 10px;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <table class="gantt-chart">
+        <tr>
+            <th class="stage">Stage</th>
+            <th class="timeline" colspan="21">Timeline</th>
+        </tr>
+        <tr>
+            <td class="stage">Sandboxing</td>
+            <td class="timeline" colspan="21">
+                <div class="bar" style="width: 800px; left: 0px;" data-label="8 days"></div>
+                <!-- Day markers for 21 days -->
+                <!-- Mark every day for clarity -->
+                <div class="day" style="left: 0px;" data-day="Day 1"></div>
+                <div class="day" style="left: 100px;" data-day="Day 2"></div>
+                <div class="day" style="left: 200px;" data-day="Day 3"></div>
+                <div class="day" style="left: 300px;" data-day="Day 4"></div>
+                <div class="day" style="left: 400px;" data-day="Day 5"></div>
+                <div class="day" style="left: 500px;" data-day="Day 6"></div>
+                <div class="day" style="left: 600px;" data-day="Day 7"></div>
+                <div class="day" style="left: 700px;" data-day="Day 8"></div>
+                <div class="day" style="left: 800px;" data-day="Day 9"></div>
+                <div class="day" style="left: 900px;" data-day="Day 10"></div>
+                <div class="day" style="left: 1000px;" data-day="Day 11"></div>
+                <div class="day" style="left: 1100px;" data-day="Day 12"></div>
+                <div class="day" style="left: 1200px;" data-day="Day 13"></div>
+                <div class="day" style="left: 1300px;" data-day="Day 14"></div>
+                <div class="day" style="left: 1400px;" data-day="Day 15"></div>
+                <div class="day" style="left: 1500px;" data-day="Day 16"></div>
+                <div class="day" style="left: 1600px;" data-day="Day 17"></div>
+                <div class="day" style="left: 1700px;" data-day="Day 18"></div>
+                <div class="day" style="left: 1800px;" data-day="Day 19"></div>
+                <div class="day" style="left: 1900px;" data-day="Day 20"></div>
+                <div class="day" style="left: 2000px;" data-day="Day 21"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="stage">Estimation</td>
+            <td class="timeline" colspan="21">
+                <div class="bar concurrent" style="width: 100px; left: 0px;" data-label="1 day"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="stage">Dev Testing</td>
+            <td class="timeline" colspan="21">
+                <div class="bar" style="width: 400px; left: 800px;" data-label="4 days"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="stage">Live Testing</td>
+            <td class="timeline" colspan="21">
+                <div class="bar" style="width: 200px; left: 1200px;" data-label="2 days"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="stage">Release</td>
+            <td class="timeline" colspan="21">
+                <div class="bar" style="width: 100px; left: 1400px;" data-label="1 day"></div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

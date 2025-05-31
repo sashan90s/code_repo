@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DE Development Process Gantt Chart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .gantt-chart {
+            width: 100%;
+            max-width: 1500px;
+            margin: auto;
+            border-collapse: collapse;
+        }
+        .gantt-chart th, .gantt-chart td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .gantt-chart th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .gantt-chart .stage {
+            width: 200px;
+        }
+        .gantt-chart .timeline {
+            position: relative;
+            width: 1200px;
+        }
+        .gantt-chart .bar {
+            height: 20px;
+            background-color: #2196F3;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 4px;
+        }
+        .gantt-chart .bar.concurrent {
+            background-color: #FF9800;
+        }
+        .gantt-chart .bar::after {
+            content: attr(data-label);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translate(5px, -50%);
+            background-color: #2196F3;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .gantt-chart .bar.concurrent::after {
+            background-color: #FF9800;
+        }
+    </style>
+</head>
+<body>
+    <table class="gantt-chart">
+        <tr>
+            <th class="stage">Stage</th>
+            <th class="timeline" colspan="30">Timeline</th>
+        </tr>
+        <tr>
+            <td class="stage">Sandboxing</td>
+            <td class="timeline" colspan="30">
+                <div class="bar" style="width: 360px; left: 0px;" data-label="5 days"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="stage">Estimation</td>
+            <td class="timeline" colspan="30">
+                <div class="bar concurrent" style="width: 120px; left: 0px;" data-label="1 day"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="stage">Dev Testing</td>
+            <td class="timeline" colspan="30">
+                <div class="bar" style="width: 360px; left: 360px;" data-label="3 days"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="stage">Live Testing</td>
+            <td class="timeline" colspan="30">
+                <div class="bar" style="width: 120px; left: 720px;" data-label="1 day"></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="stage">Release</td>
+            <td class="timeline" colspan="30">
+                <div class="bar" style="width: 120px; left: 840px;" data-label="1 day"></div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
