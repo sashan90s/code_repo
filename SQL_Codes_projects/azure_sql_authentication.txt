@@ -1,0 +1,79 @@
+
+Auth N
+Authentication
+Who you are?
+If I login, how can I make sure its me logging in?
+
+
+You can use windows authentication
+sql server authentication is using sql user name and password
+Other options- entraid or active directory
+
+Three different ways you can authenticate in:
+Cloud only - handle sign in completely in the cloud
+Federated - existing federate provider- another app to login to entra id
+pass through - 
+
+For auth N:
+You have to first set up an admin
+then login as that admin 
+provide access to other user using the following code:
+
+CREATE USER [microsoft@activedirectory.com]
+FROM EXTERNAL PROVIDER
+
+But user still cant see the tables, views of database. Because they need Authorisation. Auth Z
+
+Auth Z
+Authorisation 
+What you can see?
+What can I see when I login?
+What I can access
+
+Add the member to the role
+ALTER ROLE [db_owner]
+ADD MEMBER [microsoft@activedirectory.com]
+
+REMOVE the member to the role
+ALTER ROLE [db_owner]
+DROP MEMBER [microsoft@activedirectory.com]
+
+What are the roles available to me?
+exec sp_helprole; -- this will give ya the list.
+
+GRANT SELECT ON OBJECT:: [DBO].[TABLEP]
+TO [username@microsoft.com]
+
+GRANT - YES 
+REMOVE - No
+DENY- ABSOLUTELY NO. OVERRIDE ANY PREVIOUS PERMISSION
+
+
+<Authorisation> <permission> on <securable>::<name> to <principal>
+
+
+
+
+Seeing what your permissions are:
+select * from sys.fn_my_permissions(<object name>, <object type>)
+
+select * from sys.fn_my_permissions(DP203, 'Database')
+
+
+Custome Database Roles:
+
+CREATE ROLE MyCustomerRole1 -- you can also give some else the authorisation by using CREATE ROLE MyCustomerRole1 AUTHORISATION <owner_username>
+GRANT SELECT ON OBJECT::[DBO].[TABLE_NAME]
+TO MyCustomerRole1
+
+
+
+
+
+
+
+
+
+
+
+

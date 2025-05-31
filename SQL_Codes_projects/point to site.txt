@@ -1,0 +1,37 @@
+Public endpoint disable. How do I connect?
+You computer does not have connection to azure Vnet
+You have got two options for its
+
+-VPN conneciton to the Vnet where you have got your sql server thing installed
+-You can also set up peering from network to network then set up V{N connection to a HUB.
+
+
+##There are few ways to connection, through azure certificate or through azure active directory
+
+
+1/ Through azure certificate:
+
+Create the root and client certificate on your own computer if you follow this first process:
+https://learn.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-certificates-point-to-site
+
+or you can find codes for this here: code_repo\SQL_Codes_projects\root_client_certificate.ps1
+or https://github.com/KamalRathnayake/MeetKamalToday./tree/main/39_AzureP2SVPNGW
+
+follow this video:
+https://www.youtube.com/watch?v=NUDgBsDGv30
+or
+https://www.youtube.com/watch?v=p1mKqxWcbUo
+
+
+
+
+Or you can follow this guidelines step by step....
+
+https://learn.microsoft.com/en-us/azure/vpn-gateway/tutorial-create-gateway-portal
+https://learn.microsoft.com/en-us/azure/vpn-gateway/point-to-site-certificate-gateway
+
+
+2/ Through Azure Active Directory:
+Follow the guideline from this section
+
+https://medium.com/@devopswithyoge/virtual-network-gateway-set-up-azure-vpn-p2s-with-microsoft-entra-id-f839b75d1c8d
