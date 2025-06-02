@@ -1,0 +1,148 @@
+expression 'Errors in HTG MDS' =
+		let
+		Source = #"HTG MDS",
+		  #"Detected Type Mismatches" = let
+		    tableWithOnlyPrimitiveTypes = Table.SelectColumns(Source, Table.ColumnsOfType(Source, {type nullable number, type nullable text, type nullable logical, type nullable date, type nullable datetime, type nullable datetimezone, type nullable time, type nullable duration})),
+		    recordTypeFields = Type.RecordFields(Type.TableRow(Value.Type(tableWithOnlyPrimitiveTypes))),
+		    fieldNames = Record.FieldNames(recordTypeFields),
+		    fieldTypes = List.Transform(Record.ToList(recordTypeFields), each [Type]),
+		    pairs = List.Transform(List.Positions(fieldNames), (i) => {fieldNames{i}, (v) => if v = null or Value.Is(v, fieldTypes{i}) then v else error [Message = "The type of the value does not match the type of the column.", Detail = v], fieldTypes{i}})
+		in
+		    Table.TransformColumns(Source, pairs),
+		  #"Added Index" = Table.AddIndexColumn(#"Detected Type Mismatches", "Row Number" ,1),
+		  #"Kept Errors" = Table.SelectRowsWithErrors(#"Added Index", {"ID", "NHS Number", "GP Code", "DOB", "Linked ID / Ref", "Journey Detail", "Booking Source", "Booking Method", "Eligibility Assessment Completed", "Date Eligibility Assessment Completed", "Successfully Eligibility Assessment ", "Date of Booking", "Time of Booking", "Date Booking Confirmed", "Time Booking Confirmed", "Was the Journey Cancelled", "Date Journey Cancelled", "Time Journey Cancelled", "Cancellation Reason", "Date Journey Aborted", "Time Journey Aborted", "Aborted  Reason", "Appointment Date", "Appointment Time", "Collection Date", "Collection Time", "Location of Journey Start", "Arrival Date", "Arrival Time", "Location of Ultimate Destination", "Journey Type *National Definition", "Clinic Type", "Mobility Type *Local LOT Allocation", "Escort Required", "Number of Clinical Escorts Required", "Number of Relative Escorts Required", "Planned Pick Up Date", "Planned Pick Up Time", "Actual Pick Up Date", "Actual Pick Up Time", "Location of Journey End", "Date of Journey End", "Time of Journey End", "Cost Per Journey", "Mileage", "Out of County Activity", "Cost/Mile"}),
+		  #"Reordered Columns" = Table.ReorderColumns(#"Kept Errors", {"Row Number", "ID", "NHS Number", "GP Code", "DOB", "Linked ID / Ref", "Journey Detail", "Booking Source", "Booking Method", "Eligibility Assessment Completed", "Date Eligibility Assessment Completed", "Successfully Eligibility Assessment ", "Date of Booking", "Time of Booking", "Date Booking Confirmed", "Time Booking Confirmed", "Was the Journey Cancelled", "Date Journey Cancelled", "Time Journey Cancelled", "Cancellation Reason", "Date Journey Aborted", "Time Journey Aborted", "Aborted  Reason", "Appointment Date", "Appointment Time", "Collection Date", "Collection Time", "Location of Journey Start", "Arrival Date", "Arrival Time", "Location of Ultimate Destination", "Journey Type *National Definition", "Clinic Type", "Mobility Type *Local LOT Allocation", "Escort Required", "Number of Clinical Escorts Required", "Number of Relative Escorts Required", "Planned Pick Up Date", "Planned Pick Up Time", "Actual Pick Up Date", "Actual Pick Up Time", "Location of Journey End", "Date of Journey End", "Time of Journey End", "Cost Per Journey", "Mileage", "Out of County Activity", "Cost/Mile"})
+		in
+		  #"Reordered Columns"
+	lineageTag: 5b278b80-c024-4802-82d4-d782ca04897b
+	queryGroup: 'Query Errors - 19/10/2023 14:45:51'
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression 'HTG MDS' = ```
+		let AnalyticsQuery =
+		let Source = Json.Document(Web.Contents("https://api.loganalytics.io/v1/workspaces/64c319d1-bf51-48db-b805-ab58abc02f88/query", 
+		[Query=[#"query"="PowerBIDatasetsWorkspace
+		| project ArtifactName, ExecutingUser, PowerBIWorkspaceName, TimeGenerated, XmlaSessionId
+		| where isnotnull(ArtifactName) and ArtifactName != """" and ExecutingUser != ""Power BI Service""
+		| summarize Visits = count(), UniqueXmlaSessions = dcount(XmlaSessionId) by PowerBIWorkspaceName, ArtifactName, ExecutingUser, bin(TimeGenerated, 1h)
+		| extend Date = format_datetime(TimeGenerated, 'yyyy-MM-dd HH:mm')",#"x-ms-app"="OmsAnalyticsPBI",#"timespan"="P7D",#"prefer"="ai.response-thinning=true"],Timeout=#duration(0,0,4,0)])),
+		TypeMap = #table(
+		{ "AnalyticsTypes", "Type" }, 
+		{ 
+		{ "string",   Text.Type },
+		{ "int",      Int32.Type },
+		{ "long",     Int64.Type },
+		{ "real",     Double.Type },
+		{ "timespan", Duration.Type },
+		{ "datetime", DateTimeZone.Type },
+		{ "bool",     Logical.Type },
+		{ "guid",     Text.Type },
+		{ "dynamic",  Text.Type }
+		}),
+		DataTable = Source[tables]{0},
+		Columns = Table.FromRecords(DataTable[columns]),
+		ColumnsWithType = Table.Join(Columns, {"type"}, TypeMap , {"AnalyticsTypes"}),
+		Rows = Table.FromRows(DataTable[rows], Columns[name]), 
+		Table = Table.TransformColumnTypes(Rows, Table.ToList(ColumnsWithType, (c) => { c{0}, c{3}}))
+		in
+		Table,
+		    #"Promoted Headers" = Table.PromoteHeaders(AnalyticsQuery, [PromoteAllScalars=true]),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"DiiS Portal", type text}, {"Dorset System Control Centre", type text}, {"holly.bray@nhsdorset.nhs.uk", type text}, {"01/12/2023 12:00:00 +00:00", type datetimezone}, {"22245", Int64.Type}, {"6", Int64.Type}, {"2023-12-01 12:00", type datetime}})
+		in #"Changed Type"
+		```
+	lineageTag: 018725cd-9563-4318-a4a8-11df0345c1ec
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression 'Errors in All' =
+		let
+		Source = All,
+		  #"Detected Type Mismatches" = let
+		    tableWithOnlyPrimitiveTypes = Table.SelectColumns(Source, Table.ColumnsOfType(Source, {type nullable number, type nullable text, type nullable logical, type nullable date, type nullable datetime, type nullable datetimezone, type nullable time, type nullable duration})),
+		    recordTypeFields = Type.RecordFields(Type.TableRow(Value.Type(tableWithOnlyPrimitiveTypes))),
+		    fieldNames = Record.FieldNames(recordTypeFields),
+		    fieldTypes = List.Transform(Record.ToList(recordTypeFields), each [Type]),
+		    pairs = List.Transform(List.Positions(fieldNames), (i) => {fieldNames{i}, (v) => if v = null or Value.Is(v, fieldTypes{i}) then v else error [Message = "The type of the value does not match the type of the column.", Detail = v], fieldTypes{i}})
+		in
+		    Table.TransformColumns(Source, pairs),
+		  #"Added Index" = Table.AddIndexColumn(#"Detected Type Mismatches", "Row Number" ,1),
+		  #"Kept Errors" = Table.SelectRowsWithErrors(#"Added Index", {"ProviderName", "Compartment", "Domain", "Metric", "Average of ProviderValue", "Average of BenchmarkValue", "Average of PeerValue", "Average of Q2 2022 23", "Average of Q3 2022 23", "Average of Q4 2022 23", "Average of Q1 2023 24", "Average of Numer", "Average of Denom"}),
+		  #"Reordered Columns" = Table.ReorderColumns(#"Kept Errors", {"Row Number", "ProviderName", "Compartment", "Domain", "Metric", "Average of ProviderValue", "Average of BenchmarkValue", "Average of PeerValue", "Average of Q2 2022 23", "Average of Q3 2022 23", "Average of Q4 2022 23", "Average of Q1 2023 24", "Average of Numer", "Average of Denom"})
+		in
+		  #"Reordered Columns"
+	lineageTag: 88d575e0-5704-407f-bc98-a57ddcded37a
+	queryGroup: 'Query Errors - 23/10/2023 11:36:38'
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression All =
+		let
+		    Source = Excel.Workbook(Web.Contents("https://dorsetnhs-my.sharepoint.com/personal/tracey_jones_uhd_nhs_uk/Documents/Tracey/Shared%20folders%20with%20DCH%20&%20ICB/GIRFT%20All%20Providers%20reports%20Clinical%20Metrics/GIRFT%20June%2023%20Reports%20New%20Format/All%20Areas%20&%20providers%20pivot.xlsx"), null, true),
+		    Pivot_Sheet = Source{[Item="Pivot",Kind="Sheet"]}[Data],
+		    #"Promoted Headers1" = Table.PromoteHeaders(Pivot_Sheet, [PromoteAllScalars=true]),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Promoted Headers1",{{"Include", type text}, {"no", type text}, {"Column3", type text}, {"Column4", type text}, {"Column5", type any}, {"Column6", type any}, {"Column7", type any}, {"Column8", type any}, {"Column9", type any}, {"Column10", type any}, {"Column11", type any}, {"Column12", type any}, {"Column13", type any}}),
+		    #"Removed Top Rows" = Table.Skip(#"Changed Type1",2),
+		    #"Promoted Headers" = Table.PromoteHeaders(#"Removed Top Rows", [PromoteAllScalars=true]),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"ProviderName", type text}, {"Compartment", type text}, {"Domain", type text}, {"Metric", type text}, {"Average of ProviderValue", type number}, {"Average of BenchmarkValue", type number}, {"Average of PeerValue", type number}, {"Average of Q2 2022 23", type any}, {"Average of Q3 2022 23", type any}, {"Average of Q4 2022 23", type any}, {"Average of Q1 2023 24", type any}, {"Average of Numer", type any}, {"Average of Denom", type any}}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{{"ProviderName", "Provider"}, {"Compartment", "Speciality"}})
+		in
+		    #"Renamed Columns"
+	lineageTag: 66ed29fa-c200-4a76-826e-c0023775185f
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression 'Errors in DiiS Users' =
+		let
+		Source = #"DiiS Users",
+		  #"Detected Type Mismatches" = let
+		    tableWithOnlyPrimitiveTypes = Table.SelectColumns(Source, Table.ColumnsOfType(Source, {type nullable number, type nullable text, type nullable logical, type nullable date, type nullable datetime, type nullable datetimezone, type nullable time, type nullable duration})),
+		    recordTypeFields = Type.RecordFields(Type.TableRow(Value.Type(tableWithOnlyPrimitiveTypes))),
+		    fieldNames = Record.FieldNames(recordTypeFields),
+		    fieldTypes = List.Transform(Record.ToList(recordTypeFields), each [Type]),
+		    pairs = List.Transform(List.Positions(fieldNames), (i) => {fieldNames{i}, (v) => if v = null or Value.Is(v, fieldTypes{i}) then v else error [Message = "The type of the value does not match the type of the column.", Detail = v], fieldTypes{i}})
+		in
+		    Table.TransformColumns(Source, pairs),
+		  #"Added Index" = Table.AddIndexColumn(#"Detected Type Mismatches", "Row Number" ,1),
+		  #"Kept Errors" = Table.SelectRowsWithErrors(#"Added Index", {"Ref", "Start time", "Completion time", "Name", "Job Title / Role", "Work E-Mail Address", "Organisation 1", "Please provide a justification reason for accessing DiiS Reports", "Please provide additional context to explain your selection in Q5", "Do you need access to specialist reports / workspaces", "Please include the name of your DiiS contact for the specialist report access", "High Priority", "Approved By", "Added to Azure", "Added to Group", "Access to WCA Workspace ONLY", "Access to SWASFT Workspace ONLY", "Access to Medical Examiners Workspace ONLY", "Access to SecondaryCareContractMonitoring ONLY", "Access SW Endsocopy Workspace", "Access Vulnerable Populations Workspace", "Access Diagnostics Report ONLY", "Notes", "Account access e-mail sent", "Former CCG email address", "Drop In Invite Sent", "System Sponsor", "NDA Signed", "DateAccountCreated", "MonthsSinceCreation", "Temporary Access Removal Date", "Date account closed/deleted/Pending", "Date last used at Audit date 31/5/2022", "Audit months dif at Audit date 31/5/2022", "Audit outcome at data 31/7/2022", "Date last used at Audit date 24/8/2022", "Audit months dif at Audit date 24/8/2022", "Audit outcome at data 24/8/2022", "OrganisationName", "OrganisationalType", "Date last used at Audit date 1/12/22", "Audit months dif at Audit date 1/12/22", "Audit outcome at data 1/12/22", "Check 1/12/22", "Date last used at Audit date 13/3/23", "Audit months dif at Audit date 13/3/23", "Audit outcome at data 13/3/23", "Check 13/3/23", "Date last used at Audit date 12/6/23", "Audit months dif at Audit date 12/6/23", "Audit outcome at data 12/6/23", "Check 12/6/23", "Check 12/6/232", "Date last used at Audit date 2/10/23", "Audit months dif at Audit date 2/10/23", "Audit outcome at data 2/10/23", "Check 2/10/23", "Check 2/10/232", "Organisation", "Overaching name", "Workspace Access", "SWAST", "Medical Examiner", "Secondary Care", "SW Endsocopy", "Vulnerable Populations", "Diagnositics", "DiiS Access", "DiiS", "User Account live", "Column71"}),
+		  #"Reordered Columns" = Table.ReorderColumns(#"Kept Errors", {"Row Number", "Ref", "Start time", "Completion time", "Name", "Job Title / Role", "Work E-Mail Address", "Organisation 1", "Please provide a justification reason for accessing DiiS Reports", "Please provide additional context to explain your selection in Q5", "Do you need access to specialist reports / workspaces", "Please include the name of your DiiS contact for the specialist report access", "High Priority", "Approved By", "Added to Azure", "Added to Group", "Access to WCA Workspace ONLY", "Access to SWASFT Workspace ONLY", "Access to Medical Examiners Workspace ONLY", "Access to SecondaryCareContractMonitoring ONLY", "Access SW Endsocopy Workspace", "Access Vulnerable Populations Workspace", "Access Diagnostics Report ONLY", "Notes", "Account access e-mail sent", "Former CCG email address", "Drop In Invite Sent", "System Sponsor", "NDA Signed", "DateAccountCreated", "MonthsSinceCreation", "Temporary Access Removal Date", "Date account closed/deleted/Pending", "Date last used at Audit date 31/5/2022", "Audit months dif at Audit date 31/5/2022", "Audit outcome at data 31/7/2022", "Date last used at Audit date 24/8/2022", "Audit months dif at Audit date 24/8/2022", "Audit outcome at data 24/8/2022", "OrganisationName", "OrganisationalType", "Date last used at Audit date 1/12/22", "Audit months dif at Audit date 1/12/22", "Audit outcome at data 1/12/22", "Check 1/12/22", "Date last used at Audit date 13/3/23", "Audit months dif at Audit date 13/3/23", "Audit outcome at data 13/3/23", "Check 13/3/23", "Date last used at Audit date 12/6/23", "Audit months dif at Audit date 12/6/23", "Audit outcome at data 12/6/23", "Check 12/6/23", "Check 12/6/232", "Date last used at Audit date 2/10/23", "Audit months dif at Audit date 2/10/23", "Audit outcome at data 2/10/23", "Check 2/10/23", "Check 2/10/232", "Organisation", "Overaching name", "Workspace Access", "SWAST", "Medical Examiner", "Secondary Care", "SW Endsocopy", "Vulnerable Populations", "Diagnositics", "DiiS Access", "DiiS", "User Account live", "Column71"})
+		in
+		  #"Reordered Columns"
+	lineageTag: 7212e3b2-5770-45f2-9ce9-946b3d7f66ff
+	queryGroup: 'Query Errors - 12/04/2024 16:13:01'
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression 'Errors in DiiS Users (2)' =
+		let
+		Source = #"DiiS Users",
+		  #"Detected Type Mismatches" = let
+		    tableWithOnlyPrimitiveTypes = Table.SelectColumns(Source, Table.ColumnsOfType(Source, {type nullable number, type nullable text, type nullable logical, type nullable date, type nullable datetime, type nullable datetimezone, type nullable time, type nullable duration})),
+		    recordTypeFields = Type.RecordFields(Type.TableRow(Value.Type(tableWithOnlyPrimitiveTypes))),
+		    fieldNames = Record.FieldNames(recordTypeFields),
+		    fieldTypes = List.Transform(Record.ToList(recordTypeFields), each [Type]),
+		    pairs = List.Transform(List.Positions(fieldNames), (i) => {fieldNames{i}, (v) => if v = null or Value.Is(v, fieldTypes{i}) then v else error [Message = "The type of the value does not match the type of the column.", Detail = v], fieldTypes{i}})
+		in
+		    Table.TransformColumns(Source, pairs),
+		  #"Added Index" = Table.AddIndexColumn(#"Detected Type Mismatches", "Row Number" ,1),
+		  #"Kept Errors" = Table.SelectRowsWithErrors(#"Added Index", {"Start time", "Completion time", "Name", "Job Title / Role", "Work E-Mail Address", "Organisation 1", "Please provide a justification reason for accessing DiiS Reports", "Please provide additional context to explain your selection in Q5", "Do you need access to specialist reports / workspaces", "Please include the name of your DiiS contact for the specialist report access", "High Priority", "Approved By", "Added to Azure", "Added to Group", "Access to WCA Workspace ONLY", "Access to SWASFT Workspace ONLY", "Access to Medical Examiners Workspace ONLY", "Access to SecondaryCareContractMonitoring ONLY", "Access SW Endsocopy Workspace", "Access Vulnerable Populations Workspace", "Access Diagnostics Report ONLY", "Notes", "Account access e-mail sent", "Former CCG email address", "Drop In Invite Sent", "System Sponsor", "NDA Signed", "DateAccountCreated", "MonthsSinceCreation", "Temporary Access Removal Date", "Date account closed/deleted/Pending", "Date last used at Audit date 31/5/2022", "Audit months dif at Audit date 31/5/2022", "Audit outcome at data 31/7/2022", "Date last used at Audit date 24/8/2022", "Audit months dif at Audit date 24/8/2022", "Audit outcome at data 24/8/2022", "OrganisationName", "OrganisationalType", "Date last used at Audit date 1/12/22", "Audit months dif at Audit date 1/12/22", "Audit outcome at data 1/12/22", "Check 1/12/22", "Date last used at Audit date 13/3/23", "Audit months dif at Audit date 13/3/23", "Audit outcome at data 13/3/23", "Check 13/3/23", "Date last used at Audit date 12/6/23", "Audit months dif at Audit date 12/6/23", "Audit outcome at data 12/6/23", "Check 12/6/23", "Check 12/6/232", "Date last used at Audit date 2/10/23", "Audit months dif at Audit date 2/10/23", "Audit outcome at data 2/10/23", "Check 2/10/23", "Check 2/10/232", "Organisation", "Overaching name", "Workspace Access", "SWAST", "Medical Examiner", "Secondary Care", "SW Endsocopy", "Vulnerable Populations", "Diagnositics", "DiiS Access", "DiiS", "User Account live", "Column71", "Trim"}),
+		  #"Reordered Columns" = Table.ReorderColumns(#"Kept Errors", {"Row Number", "Start time", "Completion time", "Name", "Job Title / Role", "Work E-Mail Address", "Organisation 1", "Please provide a justification reason for accessing DiiS Reports", "Please provide additional context to explain your selection in Q5", "Do you need access to specialist reports / workspaces", "Please include the name of your DiiS contact for the specialist report access", "High Priority", "Approved By", "Added to Azure", "Added to Group", "Access to WCA Workspace ONLY", "Access to SWASFT Workspace ONLY", "Access to Medical Examiners Workspace ONLY", "Access to SecondaryCareContractMonitoring ONLY", "Access SW Endsocopy Workspace", "Access Vulnerable Populations Workspace", "Access Diagnostics Report ONLY", "Notes", "Account access e-mail sent", "Former CCG email address", "Drop In Invite Sent", "System Sponsor", "NDA Signed", "DateAccountCreated", "MonthsSinceCreation", "Temporary Access Removal Date", "Date account closed/deleted/Pending", "Date last used at Audit date 31/5/2022", "Audit months dif at Audit date 31/5/2022", "Audit outcome at data 31/7/2022", "Date last used at Audit date 24/8/2022", "Audit months dif at Audit date 24/8/2022", "Audit outcome at data 24/8/2022", "OrganisationName", "OrganisationalType", "Date last used at Audit date 1/12/22", "Audit months dif at Audit date 1/12/22", "Audit outcome at data 1/12/22", "Check 1/12/22", "Date last used at Audit date 13/3/23", "Audit months dif at Audit date 13/3/23", "Audit outcome at data 13/3/23", "Check 13/3/23", "Date last used at Audit date 12/6/23", "Audit months dif at Audit date 12/6/23", "Audit outcome at data 12/6/23", "Check 12/6/23", "Check 12/6/232", "Date last used at Audit date 2/10/23", "Audit months dif at Audit date 2/10/23", "Audit outcome at data 2/10/23", "Check 2/10/23", "Check 2/10/232", "Organisation", "Overaching name", "Workspace Access", "SWAST", "Medical Examiner", "Secondary Care", "SW Endsocopy", "Vulnerable Populations", "Diagnositics", "DiiS Access", "DiiS", "User Account live", "Column71", "Trim"})
+		in
+		  #"Reordered Columns"
+	lineageTag: 4cd01235-11e5-4f26-baec-51c196a2169f
+	queryGroup: 'Query Errors - 12/04/2024 16:19:34'
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

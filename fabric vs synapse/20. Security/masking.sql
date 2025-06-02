@@ -1,0 +1,16 @@
+
+-- ALTER TABLE DEFAULT Mask
+ALTER TABLE dbo. EmployeeData
+ALTER COLUMN [FirstName] ADD MASKED WITH (FUNCTION = 'default()');
+
+-- ALTER TABLE EMAIL Mask
+ALTER TABLE dbo. EmployeeData
+ALTER COLUMN [EmployeeEmail] ADD MASKED WITH (FUNCTION ='email()');
+
+-- ALTER TABLE RANDOM Mask
+ALTER TABLE dbo. EmployeeData
+ALTER COLUMN [Salary] ADD MASKED WITH (FUNCTION = 'random(1,10)');
+
+-- ALTER TABLE PARTIAL Mask
+ALTER TABLE dbo.EmployeeData
+ALTER COLUMN [AccountDetails] ADD MASKED WITH (FUNCTION ='partial(1,"XXXXX",2)');

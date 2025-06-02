@@ -1,0 +1,370 @@
+table 'Azure Log Analytics'
+	lineageTag: 29b434c2-0029-41a4-86b6-80f1d5cc0b14
+
+	measure DistinctUsers = DISTINCTCOUNT('Azure Log Analytics'[ExecutingUser])
+		formatString: 0
+		lineageTag: 96059271-786f-4119-a031-7fafcaf1442d
+
+	measure 'Utilisation Rate1' = [DistinctUsers]/[Total Users]
+		lineageTag: 4798aa94-2c21-4010-b099-ac7d4abe8c89
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Views' = Count('Azure Log Analytics'[Views])
+		formatString: 0
+		lineageTag: f277b61e-faac-4c84-884b-4d49e409cef7
+
+	measure '% of Views' = ```
+			'Azure Log Analytics'[Total Views]/[Total Views]
+			
+			```
+		lineageTag: f78ca5c2-5999-4320-9d5b-8507eb167602
+
+		extendedProperty MeasureTemplate =
+				{
+				  "version": 0,
+				  "daxTemplateName": "MathematicalDivision"
+				}
+
+		changedProperty = FormatString
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure AverageDistinctExecutingUsers = ```
+			
+			CALCULATE(
+			    AVERAGEX(
+			        VALUES('Azure Log Analytics'[Date]),
+			        DISTINCTCOUNT('Azure Log Analytics'[ExecutingUser])
+			    ),
+			    ALLEXCEPT('Azure Log Analytics', 'Azure Log Analytics'[Date])
+			)
+			
+			```
+		lineageTag: 1fec3aa3-f9d5-409f-85d5-b50300411e46
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Utilisation Rate' = ```
+			DIVIDE([DistinctUsers], [Total Users])
+			
+			```
+		formatString: 0%;-0%;0%
+		lineageTag: 04fdec55-c65f-4697-aa49-09c1a4b3c061
+
+		extendedProperty MeasureTemplate =
+				{
+				  "version": 0,
+				  "daxTemplateName": "MathematicalDivision"
+				}
+
+		changedProperty = FormatString
+
+	column 'Report Name'
+		dataType: string
+		lineageTag: a2219c93-842a-4ace-908c-4a2f67971cac
+		summarizeBy: none
+		sourceColumn: Report Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column ExecutingUser
+		dataType: string
+		lineageTag: 5c768dd3-45a4-4636-9469-90bdf5eaa14c
+		summarizeBy: none
+		sourceColumn: ExecutingUser
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Azure Log Analytics","TableItemName":"ExecutingUser (groups)","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	column TimeGenerated
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: d09232e0-2f75-4a2f-8956-a0e295ee5493
+		summarizeBy: none
+		sourceColumn: TimeGenerated
+
+		variation Variation
+			isDefault
+			relationship: ce13d2a6-f645-4ad8-87a6-b194736ddf0b
+			defaultHierarchy: LocalDateTable_3447a968-3d6b-4e2f-a128-9eafba9f5642.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date = FORMAT('Azure Log Analytics'[TimeGenerated], "DD MMMM YYYY")
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 5552d647-b495-4e6f-9074-f79d5c4fd3dd
+		summarizeBy: none
+
+		variation Variation
+			isDefault
+			relationship: a5415b66-4df0-4740-9c8b-64094e9cbedc
+			defaultHierarchy: LocalDateTable_75fb14fe-2eff-4bcb-b767-862f66cf68fe.'Date Hierarchy'
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column HourBucket = HOUR('Azure Log Analytics'[TimeGenerated])
+		formatString: 0
+		lineageTag: 9677f576-efa6-4294-b7dc-0f3386f09eb0
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month = FORMAT('Azure Log Analytics'[TimeGenerated], "MMMM")
+		dataType: string
+		lineageTag: 02887192-0094-464e-9a85-0ab183a018a2
+		summarizeBy: none
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+	column Day = FORMAT('Azure Log Analytics'[TimeGenerated], "DDDD")
+		dataType: string
+		lineageTag: f676c443-3ec2-451d-b611-beb63cbba6a3
+		summarizeBy: none
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+	column DayOrder = ```
+			SWITCH('Azure Log Analytics'[Day],
+			    "Monday", 1,
+			    "Tuesday", 2,
+			    "Wednesday", 3,
+			    "Thursday", 4,
+			    "Friday", 5,
+			    "Saturday", 6,
+			    "Sunday", 7,
+			    0
+			)
+			
+			```
+		formatString: 0
+		lineageTag: 52b250be-4027-415a-b2ed-6a87e65f1e2b
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Visits
+		dataType: int64
+		formatString: 0
+		lineageTag: 30cac11f-d51e-423c-9d33-ba5ae64e9acd
+		summarizeBy: sum
+		sourceColumn: Visits
+
+		annotation SummarizationSetBy = Automatic
+
+	column Views
+		dataType: int64
+		formatString: 0
+		lineageTag: c81197e2-729b-4c3d-94d2-0629816043f0
+		summarizeBy: sum
+		sourceColumn: Views
+
+		annotation SummarizationSetBy = Automatic
+
+	column Workspace
+		dataType: string
+		lineageTag: d40f41f9-5211-4593-9418-bc6807f46689
+		summarizeBy: none
+		sourceColumn: Workspace
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation __PBI_SemanticLinks = [{"LinkTarget":{"TableName":"Azure Log Analytics","TableItemName":"Workspace (groups)","ObjectType":4},"LinkType":"UsedInGroup"}]
+
+	column Date1
+		dataType: string
+		lineageTag: b4a51de8-afbb-463c-85dd-c0b3c09d5b28
+		summarizeBy: none
+		sourceColumn: Date1
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Weekend v Weekday' = ```
+			IF( WEEKDAY('Azure Log Analytics'[DayOrder]) >= 6, "Weekend", "Weekday" )
+			
+			```
+		lineageTag: 22aa0854-7a80-47f0-92be-702032ed5a30
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ExecutingUser (groups)' =
+			SWITCH(
+				TRUE,
+				ISBLANK('Azure Log Analytics'[ExecutingUser]),
+				"(Blank)",
+				'Azure Log Analytics'[ExecutingUser] IN {"abby.dewhurst@nhsdorset.nhs.uk",
+					"adm.isabelle.webb@diis.nhs.uk",
+					"adm.paul.wilding@diis.nhs.uk",
+					"andrew.buckley@nhsdorset.nhs.uk",
+					"andrew.poole@nhsdorset.nhs.uk",
+					"chris.cooper@nhsdorset.nhs.uk",
+					"darryl.houghton@nhsdorset.nhs.uk",
+					"heather.case@nhsdorset.nhs.uk",
+					"holly.bray@nhsdorset.nhs.uk",
+					"ian.small@nhsdorset.nhs.uk",
+					"isabelle.webb@dchft.nhs.uk",
+					"james.woodland@nhsdorset.nhs.uk",
+					"jordan.butler@dhc.nhs.uk",
+					"jordan.butler@nhsdorset.nhs.uk",
+					"jorden.brereton@dchft.nhs.uk",
+					"kim.rickard@nhsdorset.nhs.uk",
+					"krzysztof.cepa@nhsdorset.nhs.uk",
+					"laura.pearson@dchft.nhs.uk",
+					"livvy.williams@nhsdorset.nhs.uk",
+					"louise.taylor@nhsdorset.nhs.uk",
+					"matthew.prowse@nhsdorset.nhs.uk",
+					"matthew.whitlock@dhc.nhs.uk",
+					"maxie.beals@nhsdorset.nhs.uk",
+					"mercy.bernard@nhsdorset.nhs.uk",
+					"michael.davis@nhsdorset.nhs.uk",
+					"nicola.dean@nhsdorset.nhs.uk",
+					"nicola.dench@dhc.nhs.uk",
+					"paul.wilding@dhc.nhs.uk",
+					"paula.ellison@dhc.nhs.uk",
+					"rebecca.murphy@nhsdorset.nhs.uk",
+					"rhianna.o'connor@dchft.nhs.uk",
+					"rob.dabbs@nhsdorset.nhs.uk",
+					"scott.francismitchell@nhsdorset.nhs.uk",
+					"sue.o'kerwin@nhsdorset.nhs.uk"},
+				"DiiS",
+				"Users"
+			)
+		lineageTag: 449f19e3-d623-4be2-a898-1eccdb62ce95
+		summarizeBy: none
+
+		extendedProperty GroupingMetadata =
+				{
+				  "version": 0,
+				  "groupedColumns": [
+				    {
+				      "Column": {
+				        "Expression": {
+				          "SourceRef": {
+				            "Entity": "Azure Log Analytics"
+				          }
+				        },
+				        "Property": "ExecutingUser"
+				      }
+				    }
+				  ]
+				}
+
+		annotation GroupingDesignState = {"Version":0,"Sources":[{"Name":"a","Entity":"Azure Log Analytics"}],"GroupedColumns":[{"Column":{"Expression":{"SourceRef":{"Source":"a"}},"Property":"ExecutingUser"}}],"GroupItems":[{"DisplayName":"(Blank)","BlankDefaultPlaceholder":true},{"DisplayName":"DiiS","Expression":{"In":{"Expressions":[{"Column":{"Expression":{"SourceRef":{"Source":"a"}},"Property":"ExecutingUser"}}],"Values":[[{"Literal":{"Value":"'abby.dewhurst@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'adm.isabelle.webb@diis.nhs.uk'"}}],[{"Literal":{"Value":"'adm.paul.wilding@diis.nhs.uk'"}}],[{"Literal":{"Value":"'andrew.buckley@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'andrew.poole@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'chris.cooper@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'darryl.houghton@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'heather.case@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'holly.bray@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'ian.small@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'isabelle.webb@dchft.nhs.uk'"}}],[{"Literal":{"Value":"'james.woodland@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'jordan.butler@dhc.nhs.uk'"}}],[{"Literal":{"Value":"'jordan.butler@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'jorden.brereton@dchft.nhs.uk'"}}],[{"Literal":{"Value":"'kim.rickard@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'krzysztof.cepa@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'laura.pearson@dchft.nhs.uk'"}}],[{"Literal":{"Value":"'livvy.williams@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'louise.taylor@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'matthew.prowse@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'matthew.whitlock@dhc.nhs.uk'"}}],[{"Literal":{"Value":"'maxie.beals@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'mercy.bernard@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'michael.davis@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'nicola.dean@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'nicola.dench@dhc.nhs.uk'"}}],[{"Literal":{"Value":"'paul.wilding@dhc.nhs.uk'"}}],[{"Literal":{"Value":"'paula.ellison@dhc.nhs.uk'"}}],[{"Literal":{"Value":"'rebecca.murphy@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'rhianna.o''connor@dchft.nhs.uk'"}}],[{"Literal":{"Value":"'rob.dabbs@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'scott.francismitchell@nhsdorset.nhs.uk'"}}],[{"Literal":{"Value":"'sue.o''kerwin@nhsdorset.nhs.uk'"}}]]}}},{"DisplayName":"Users"}]}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Workspace (groups)' =
+			SWITCH(
+				TRUE,
+				ISBLANK('Azure Log Analytics'[Workspace]),
+				"(Blank)",
+				'Azure Log Analytics'[Workspace] IN {"Demo - ICS Intelligence [Prod]",
+					"DiiS - Internal",
+					"DiiS Portal",
+					"DiiS Portal [Dev/Test]"},
+				"DiiS",
+				'Azure Log Analytics'[Workspace] IN {"DiiS South West Endoscopy"},
+				"DiiS South West Endoscopy",
+				'Azure Log Analytics'[Workspace] IN {"Dorset Open Door Bereavement Service"},
+				"Dorset Open Door Bereavement Service",
+				'Azure Log Analytics'[Workspace] IN {"MH - Dorset System Overview",
+					"MH - Report Dev Area"},
+				"MH",
+				'Azure Log Analytics'[Workspace] IN {"Quality - Care Homes"},
+				"Quality - Care Homes",
+				'Azure Log Analytics'[Workspace] IN {"Safeguarding"},
+				"Safeguarding",
+				'Azure Log Analytics'[Workspace] IN {"SW Ambulance Commissioning"},
+				"SWAST",
+				'Azure Log Analytics'[Workspace] IN {"Wessex Cancer Intelligence"},
+				"WCA",
+				'Azure Log Analytics'[Workspace]
+			)
+		lineageTag: 5fd1a012-1027-4e95-86d1-17af0880186b
+		summarizeBy: none
+
+		extendedProperty GroupingMetadata =
+				{
+				  "version": 0,
+				  "groupedColumns": [
+				    {
+				      "Column": {
+				        "Expression": {
+				          "SourceRef": {
+				            "Entity": "Azure Log Analytics"
+				          }
+				        },
+				        "Property": "Workspace"
+				      }
+				    }
+				  ]
+				}
+
+		annotation GroupingDesignState = {"Version":0,"Sources":[{"Name":"a","Entity":"Azure Log Analytics"}],"GroupedColumns":[{"Column":{"Expression":{"SourceRef":{"Source":"a"}},"Property":"Workspace"}}],"GroupItems":[{"DisplayName":"(Blank)","BlankDefaultPlaceholder":true},{"DisplayName":"DiiS","Expression":{"In":{"Expressions":[{"Column":{"Expression":{"SourceRef":{"Source":"a"}},"Property":"Workspace"}}],"Values":[[{"Literal":{"Value":"'Demo - ICS Intelligence [Prod]'"}}],[{"Literal":{"Value":"'DiiS - Internal'"}}],[{"Literal":{"Value":"'DiiS Portal'"}}],[{"Literal":{"Value":"'DiiS Portal [Dev/Test]'"}}]]}}},{"DisplayName":"DiiS South West Endoscopy","Expression":{"In":{"Expressions":[{"Column":{"Expression":{"SourceRef":{"Source":"a"}},"Property":"Workspace"}}],"Values":[[{"Literal":{"Value":"'DiiS South West Endoscopy'"}}]]}}},{"DisplayName":"Dorset Open Door Bereavement Service","Expression":{"In":{"Expressions":[{"Column":{"Expression":{"SourceRef":{"Source":"a"}},"Property":"Workspace"}}],"Values":[[{"Literal":{"Value":"'Dorset Open Door Bereavement Service'"}}]]}}},{"DisplayName":"MH","Expression":{"In":{"Expressions":[{"Column":{"Expression":{"SourceRef":{"Source":"a"}},"Property":"Workspace"}}],"Values":[[{"Literal":{"Value":"'MH - Dorset System Overview'"}}],[{"Literal":{"Value":"'MH - Report Dev Area'"}}]]}}},{"DisplayName":"Quality - Care Homes","Expression":{"In":{"Expressions":[{"Column":{"Expression":{"SourceRef":{"Source":"a"}},"Property":"Workspace"}}],"Values":[[{"Literal":{"Value":"'Quality - Care Homes'"}}]]}}},{"DisplayName":"Safeguarding","Expression":{"In":{"Expressions":[{"Column":{"Expression":{"SourceRef":{"Source":"a"}},"Property":"Workspace"}}],"Values":[[{"Literal":{"Value":"'Safeguarding'"}}]]}}},{"DisplayName":"SWAST","Expression":{"In":{"Expressions":[{"Column":{"Expression":{"SourceRef":{"Source":"a"}},"Property":"Workspace"}}],"Values":[[{"Literal":{"Value":"'SW Ambulance Commissioning'"}}]]}}},{"DisplayName":"WCA","Expression":{"In":{"Expressions":[{"Column":{"Expression":{"SourceRef":{"Source":"a"}},"Property":"Workspace"}}],"Values":[[{"Literal":{"Value":"'Wessex Cancer Intelligence'"}}]]}}}]}
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeekNumber = WEEKNUM('Azure Log Analytics'[Date], 2)
+		formatString: 0
+		lineageTag: 85bff245-6cf3-4cf5-9e2b-9cd1155adb95
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Views1 = ```
+			IF(ISBLANK('Azure Log Analytics'[Views]), BLANK(), 1)
+			
+			```
+		formatString: 0
+		lineageTag: 4d32cfca-98b9-40fd-98af-a4ff9a73c601
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Azure Log Analytics' = m
+		mode: import
+		source = ```
+				let AnalyticsQuery =
+				let Source = Json.Document(Web.Contents("https://api.loganalytics.io/v1/workspaces/64c319d1-bf51-48db-b805-ab58abc02f88/query", 
+				[Query=[#"query"="PowerBIDatasetsWorkspace
+				| project ArtifactName, ExecutingUser, PowerBIWorkspaceName, TimeGenerated, XmlaSessionId
+				| where isnotnull(ArtifactName) and ArtifactName != """" and ExecutingUser != ""Power BI Service""
+				| summarize Visits = count(), UniqueXmlaSessions = dcount(XmlaSessionId) by PowerBIWorkspaceName, ArtifactName, ExecutingUser, bin(TimeGenerated, 1h)
+				| extend Date = format_datetime(TimeGenerated, 'yyyy-MM-dd HH:mm')",#"x-ms-app"="OmsAnalyticsPBI",#"timespan"="P365D",#"prefer"="ai.response-thinning=true"],Timeout=#duration(0,0,4,0)])),
+				TypeMap = #table(
+				{ "AnalyticsTypes", "Type" }, 
+				{ 
+				{ "string",   Text.Type },
+				{ "int",      Int32.Type },
+				{ "long",     Int64.Type },
+				{ "real",     Double.Type },
+				{ "timespan", Duration.Type },
+				{ "datetime", DateTimeZone.Type },
+				{ "bool",     Logical.Type },
+				{ "guid",     Text.Type },
+				{ "dynamic",  Text.Type }
+				}),
+				DataTable = Source[tables]{0},
+				Columns = Table.FromRecords(DataTable[columns]),
+				ColumnsWithType = Table.Join(Columns, {"type"}, TypeMap , {"AnalyticsTypes"}),
+				Rows = Table.FromRows(DataTable[rows], Columns[name]), 
+				Table = Table.TransformColumnTypes(Rows, Table.ToList(ColumnsWithType, (c) => { c{0}, c{3}}))
+				in
+				Table,
+				    #"Renamed Columns" = Table.RenameColumns(AnalyticsQuery,{{"Date", "Date1"}, {"UniqueXmlaSessions", "Views"}, {"PowerBIWorkspaceName", "Workspace"}, {"ArtifactName", "Report Name"}})
+				in #"Renamed Columns"
+				```
+
+	annotation PBI_ResultType = Exception
+

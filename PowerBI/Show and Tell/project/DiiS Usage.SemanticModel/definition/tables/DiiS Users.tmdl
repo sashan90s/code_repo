@@ -1,0 +1,671 @@
+table 'DiiS Users'
+	lineageTag: 7cc92267-948f-46c7-931d-70dfd6e44deb
+
+	measure 'DiiS User Accounts' = COUNTROWS('DiiS Users')
+		formatString: 0
+		lineageTag: 50611082-1307-4b5e-b9a2-16eaff5ab5bd
+
+	measure UsersWithAccessToWCAWorkspace =
+			
+			CALCULATE(
+			    COUNTAX(
+			        FILTER('DiiS Users', NOT(ISBLANK('DiiS Users'[Access to WCA Workspace Only])))
+			    , 1)
+			)
+		formatString: 0
+		lineageTag: f6d23dbd-e64c-447c-a015-4464fc37ffb3
+
+	measure UsersWithAccessToSWASTWorkspace = ```
+			
+			CALCULATE(
+			    COUNTAX (
+			        FILTER('DiiS Users', NOT(ISBLANK('DiiS Users'[Access to SWASFT Workspace ONLY])))
+			    , 1)
+			)
+			
+			```
+		formatString: 0
+		lineageTag: a22d5445-85a2-43c2-8288-6214605dc7db
+
+	measure 'Total Users' = ```
+			COUNTROWS(ALL('DiiS Users'))
+			
+			```
+		formatString: 0
+		lineageTag: 047e3644-1c21-4cf4-a912-9738f8cde9db
+
+	column 'Start time'
+		dataType: string
+		lineageTag: 9a5d400d-e9d0-4fc0-8c86-a660e91abedc
+		summarizeBy: none
+		sourceColumn: Start time
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Completion time'
+		dataType: string
+		lineageTag: 8e63aeec-492a-414a-a5d3-fbce2f0b6676
+		summarizeBy: none
+		sourceColumn: Completion time
+
+		annotation SummarizationSetBy = Automatic
+
+	column Name
+		dataType: string
+		lineageTag: 491119b2-bf8c-41fe-bcf7-f86f295dc818
+		summarizeBy: none
+		sourceColumn: Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Job Title / Role'
+		dataType: string
+		lineageTag: ee6096e9-bb9f-45ba-b49f-29b157de2e16
+		summarizeBy: none
+		sourceColumn: Job Title / Role
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Work E-Mail Address'
+		dataType: string
+		lineageTag: 6e6cb19f-6560-49e9-8d3f-2aec69bee5f8
+		summarizeBy: none
+		sourceColumn: Work E-Mail Address
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Organisation 1'
+		dataType: string
+		lineageTag: ce00e862-a157-4edc-8fd3-f6a5f990d14a
+		summarizeBy: none
+		sourceColumn: Organisation 1
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Added to Group'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: a511a8da-abda-4f5a-8ed4-317f43e49545
+		summarizeBy: none
+		sourceColumn: Added to Group
+
+		variation Variation
+			isDefault
+			relationship: dfbe3b55-5df5-421f-8fbb-1d6d1a3b3c52
+			defaultHierarchy: LocalDateTable_2456964e-19be-4195-8584-1c3257c6315f.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Date account closed/deleted/Pending'
+		dataType: string
+		lineageTag: 4a7ed209-b061-4af7-a6c8-41623c596780
+		summarizeBy: none
+		sourceColumn: Date account closed/deleted/Pending
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Date last used at Audit date 31/5/2022'
+		dataType: string
+		lineageTag: e6689cb8-6c03-46aa-a2ec-1698dff7683a
+		summarizeBy: none
+		sourceColumn: Date last used at Audit date 31/5/2022
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Audit months dif at Audit date 31/5/2022'
+		dataType: string
+		lineageTag: 15c44c01-2940-4266-89ae-acac883923d9
+		summarizeBy: none
+		sourceColumn: Audit months dif at Audit date 31/5/2022
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrganisationName
+		dataType: string
+		lineageTag: 73b421c4-2641-4865-8d56-908f215580ce
+		summarizeBy: none
+		sourceColumn: OrganisationName
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrganisationalType
+		dataType: string
+		lineageTag: 59971ad7-8bd9-4fb7-afea-d5d26511bbef
+		summarizeBy: none
+		sourceColumn: OrganisationalType
+
+		annotation SummarizationSetBy = Automatic
+
+	column Organisation
+		dataType: string
+		lineageTag: 1ef22207-1770-49c2-93bf-1bbf3ba8ed79
+		summarizeBy: none
+		sourceColumn: Organisation
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Overaching name'
+		dataType: string
+		lineageTag: d9cbace3-8c70-4f01-afa5-06435210296e
+		summarizeBy: none
+		sourceColumn: Overaching name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Please provide a justification reason for accessing DiiS Reports'
+		dataType: string
+		lineageTag: da55a4d4-c0a5-42b5-873e-7183958a61cf
+		summarizeBy: none
+		sourceColumn: Please provide a justification reason for accessing DiiS Reports
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Please provide additional context to explain your selection in Q5'
+		dataType: string
+		lineageTag: 7a701aa9-895c-4050-b0ff-ddf46d388196
+		summarizeBy: none
+		sourceColumn: Please provide additional context to explain your selection in Q5
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Do you need access to specialist reports / workspaces'
+		dataType: string
+		lineageTag: b6470fb0-97d1-4b7b-86ea-56c000105d6d
+		summarizeBy: none
+		sourceColumn: Do you need access to specialist reports / workspaces
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Please include the name of your DiiS contact for the specialist report access'
+		dataType: string
+		lineageTag: d8820002-a68b-4b0f-a4c6-9cc004acb04e
+		summarizeBy: none
+		sourceColumn: Please include the name of your DiiS contact for the specialist report access
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'High Priority'
+		dataType: string
+		lineageTag: ce0dd74a-c921-4d33-98d1-dcd209609c5e
+		summarizeBy: none
+		sourceColumn: High Priority
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Approved By'
+		dataType: string
+		lineageTag: d9908c7b-a6d3-453e-ade1-57dcc072fa33
+		summarizeBy: none
+		sourceColumn: Approved By
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Added to Azure'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: a9ad9d1c-8720-45a2-9ad7-68225cdacd7b
+		summarizeBy: none
+		sourceColumn: Added to Azure
+
+		variation Variation
+			isDefault
+			relationship: 188859cf-f3ba-469b-b0d8-fdfe4274cd1a
+			defaultHierarchy: LocalDateTable_3bceced7-b729-4a22-ba18-5c84120783bc.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Access to WCA Workspace ONLY'
+		dataType: string
+		lineageTag: cf19d921-cda5-4409-b105-21f4ad89eda1
+		summarizeBy: none
+		sourceColumn: Access to WCA Workspace ONLY
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Access to SWASFT Workspace ONLY'
+		dataType: string
+		lineageTag: bb354494-36c8-4349-a94b-b44d3b20bd4c
+		summarizeBy: none
+		sourceColumn: Access to SWASFT Workspace ONLY
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Access to Medical Examiners Workspace ONLY'
+		dataType: string
+		lineageTag: 39a649b2-f311-4d76-807b-3dffbea57e01
+		summarizeBy: none
+		sourceColumn: Access to Medical Examiners Workspace ONLY
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Access to SecondaryCareContractMonitoring ONLY'
+		dataType: string
+		lineageTag: cb77b7e7-4aec-4e3d-93f5-4404dd96c8b5
+		summarizeBy: none
+		sourceColumn: Access to SecondaryCareContractMonitoring ONLY
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Access SW Endsocopy Workspace'
+		dataType: string
+		lineageTag: 1f217a01-01b5-47d1-95b0-796542943fea
+		summarizeBy: none
+		sourceColumn: Access SW Endsocopy Workspace
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Access Vulnerable Populations Workspace'
+		dataType: string
+		lineageTag: 32ab40b2-b57b-4e9c-8df1-fa67d0e8f5dd
+		summarizeBy: none
+		sourceColumn: Access Vulnerable Populations Workspace
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Access Diagnostics Report ONLY'
+		dataType: string
+		lineageTag: 28d2b003-606c-42c0-bb3c-e01c00a0173e
+		summarizeBy: none
+		sourceColumn: Access Diagnostics Report ONLY
+
+		annotation SummarizationSetBy = Automatic
+
+	column Notes
+		dataType: string
+		lineageTag: 36cb5240-ab99-4fcb-8afc-63035b9d3ada
+		summarizeBy: none
+		sourceColumn: Notes
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Account access e-mail sent'
+		dataType: string
+		lineageTag: 1e3bcd26-8dee-48dd-b28a-7609f97b0212
+		summarizeBy: none
+		sourceColumn: Account access e-mail sent
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Former CCG email address'
+		dataType: string
+		lineageTag: 6f498d80-1094-4647-a8d4-1f41f3ca6c65
+		summarizeBy: none
+		sourceColumn: Former CCG email address
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Drop In Invite Sent'
+		dataType: string
+		lineageTag: 0b6c1dee-be44-40d1-90f5-3a520a0d290f
+		summarizeBy: none
+		sourceColumn: Drop In Invite Sent
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'System Sponsor'
+		dataType: string
+		lineageTag: 2693b7b6-0591-4652-9fda-8db170580260
+		summarizeBy: none
+		sourceColumn: System Sponsor
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'NDA Signed'
+		dataType: string
+		lineageTag: b20d44b0-aa8e-43e6-930e-8f58e10c7199
+		summarizeBy: none
+		sourceColumn: NDA Signed
+
+		annotation SummarizationSetBy = Automatic
+
+	column DateAccountCreated
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: ebe79a3c-1c6d-4921-8d94-32bc163fb0a7
+		summarizeBy: none
+		sourceColumn: DateAccountCreated
+
+		variation Variation
+			isDefault
+			relationship: 4786f385-7a09-4021-b9c2-54733a5a0fe6
+			defaultHierarchy: LocalDateTable_3cbb877f-4949-4220-8bf1-1a4085e02db4.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column MonthsSinceCreation
+		dataType: int64
+		formatString: 0
+		lineageTag: 2d4bc359-4660-47fc-9da4-66d4b24893a8
+		summarizeBy: sum
+		sourceColumn: MonthsSinceCreation
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Temporary Access Removal Date'
+		dataType: string
+		lineageTag: bb5f9991-be87-4cb3-b502-32233595d53b
+		summarizeBy: none
+		sourceColumn: Temporary Access Removal Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Audit outcome at data 31/7/2022'
+		dataType: string
+		lineageTag: df7e41bf-1dd1-438f-9039-fb80b4a0439c
+		summarizeBy: none
+		sourceColumn: Audit outcome at data 31/7/2022
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Date last used at Audit date 24/8/2022'
+		dataType: string
+		lineageTag: d1cb355a-85f3-441f-a8ad-248a2d4ecb9c
+		summarizeBy: none
+		sourceColumn: Date last used at Audit date 24/8/2022
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Audit months dif at Audit date 24/8/2022'
+		dataType: string
+		lineageTag: 8e6e8625-2383-4acc-97a8-414db4694989
+		summarizeBy: none
+		sourceColumn: Audit months dif at Audit date 24/8/2022
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Audit outcome at data 24/8/2022'
+		dataType: string
+		lineageTag: 013da262-acac-4626-8bc8-9841a097c002
+		summarizeBy: none
+		sourceColumn: Audit outcome at data 24/8/2022
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Date last used at Audit date 1/12/22'
+		dataType: string
+		lineageTag: 6ae60569-5ac0-46c7-8610-623be3cf5162
+		summarizeBy: none
+		sourceColumn: Date last used at Audit date 1/12/22
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Audit months dif at Audit date 1/12/22'
+		dataType: string
+		lineageTag: fc7466b0-a58c-4ff2-bd08-8f588e644a50
+		summarizeBy: none
+		sourceColumn: Audit months dif at Audit date 1/12/22
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Audit outcome at data 1/12/22'
+		dataType: string
+		lineageTag: ef6c22d6-8ee2-4d48-8db0-58b2b8306858
+		summarizeBy: none
+		sourceColumn: Audit outcome at data 1/12/22
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Check 1/12/22'
+		dataType: string
+		lineageTag: a4e57c6c-22ad-4d7c-a124-a0e159da17a0
+		summarizeBy: none
+		sourceColumn: Check 1/12/22
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Date last used at Audit date 13/3/23'
+		dataType: string
+		lineageTag: 144e8d4e-38e5-4bc5-a13f-178a84f0471a
+		summarizeBy: none
+		sourceColumn: Date last used at Audit date 13/3/23
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Audit months dif at Audit date 13/3/23'
+		dataType: string
+		lineageTag: 808b4c7f-2916-4ef1-9d2d-d14421550476
+		summarizeBy: none
+		sourceColumn: Audit months dif at Audit date 13/3/23
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Audit outcome at data 13/3/23'
+		dataType: string
+		lineageTag: d419a553-a8c2-4ef8-bbec-5a5b3b92d366
+		summarizeBy: none
+		sourceColumn: Audit outcome at data 13/3/23
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Check 13/3/23'
+		dataType: string
+		lineageTag: 4745267c-db59-4893-a6cc-0ba49199d559
+		summarizeBy: none
+		sourceColumn: Check 13/3/23
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Date last used at Audit date 12/6/23'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 6932b397-c574-405a-9947-4c7f47ba652d
+		summarizeBy: none
+		sourceColumn: Date last used at Audit date 12/6/23
+
+		variation Variation
+			isDefault
+			relationship: a3346781-a739-4f96-b0d9-68264d5673c8
+			defaultHierarchy: LocalDateTable_13fc65af-9944-41dc-bf83-8f5b6dd3cf8c.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Audit months dif at Audit date 12/6/23'
+		dataType: int64
+		formatString: 0
+		lineageTag: 49b97fc8-65c8-4e59-b719-b72d2854b963
+		summarizeBy: sum
+		sourceColumn: Audit months dif at Audit date 12/6/23
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Audit outcome at data 12/6/23'
+		dataType: string
+		lineageTag: 27c6776c-80cf-481c-a1f4-3ba03aadc64d
+		summarizeBy: none
+		sourceColumn: Audit outcome at data 12/6/23
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Check 12/6/23'
+		dataType: string
+		lineageTag: 7f65a5e3-4cf1-48ef-aca6-84d9f4388c57
+		summarizeBy: none
+		sourceColumn: Check 12/6/23
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Check 12/6/232'
+		dataType: string
+		lineageTag: f35867dd-f518-4fb3-aa34-b4d7bd877869
+		summarizeBy: none
+		sourceColumn: Check 12/6/232
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Date last used at Audit date 2/10/23'
+		dataType: string
+		lineageTag: 35c15efc-e199-4bb5-a65b-d83f9e08314d
+		summarizeBy: none
+		sourceColumn: Date last used at Audit date 2/10/23
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Audit months dif at Audit date 2/10/23'
+		dataType: int64
+		formatString: 0
+		lineageTag: 2db93641-05e6-485e-8b5f-0e16cbaa7b63
+		summarizeBy: sum
+		sourceColumn: Audit months dif at Audit date 2/10/23
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Audit outcome at data 2/10/23'
+		dataType: string
+		lineageTag: 7fb64f47-7020-4db3-88fa-ef2b77036a6e
+		summarizeBy: none
+		sourceColumn: Audit outcome at data 2/10/23
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Check 2/10/23'
+		dataType: string
+		lineageTag: b9f0b309-8804-4e26-90bd-69553e7a884e
+		summarizeBy: none
+		sourceColumn: Check 2/10/23
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Check 2/10/232'
+		dataType: string
+		lineageTag: 1fb3852f-de8b-4c6b-9e3d-fd9f5d1cbe67
+		summarizeBy: none
+		sourceColumn: Check 2/10/232
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Workspace Access'
+		dataType: string
+		lineageTag: 26bb6199-9727-4615-b229-c36aee25adc3
+		summarizeBy: none
+		sourceColumn: Workspace Access
+
+		annotation SummarizationSetBy = Automatic
+
+	column SWAST
+		dataType: string
+		lineageTag: 368f4f4b-bc8d-4c52-98cc-12edc23632f5
+		summarizeBy: none
+		sourceColumn: SWAST
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Medical Examiner'
+		dataType: string
+		lineageTag: d839370a-43a4-4637-aa1a-64beed7f4c37
+		summarizeBy: none
+		sourceColumn: Medical Examiner
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Secondary Care'
+		dataType: string
+		lineageTag: 0312d998-6ed4-4e63-be0f-1d903d4a7de9
+		summarizeBy: none
+		sourceColumn: Secondary Care
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'SW Endsocopy'
+		dataType: string
+		lineageTag: 39c92c41-a797-4416-9ec6-b97bfc3a02d8
+		summarizeBy: none
+		sourceColumn: SW Endsocopy
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Vulnerable Populations'
+		dataType: string
+		lineageTag: 78a841f7-e7a5-435f-a210-dd28a83c6244
+		summarizeBy: none
+		sourceColumn: Vulnerable Populations
+
+		annotation SummarizationSetBy = Automatic
+
+	column Diagnositics
+		dataType: string
+		lineageTag: 167c1f48-b10b-409a-afa2-68fa17be765f
+		summarizeBy: none
+		sourceColumn: Diagnositics
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DiiS Access'
+		dataType: string
+		lineageTag: 2403e705-e795-4a86-a1f0-b6bda6b4849e
+		summarizeBy: none
+		sourceColumn: DiiS Access
+
+		annotation SummarizationSetBy = Automatic
+
+	column DiiS
+		dataType: string
+		lineageTag: cff0a0fa-e824-4238-b3b6-d2ede1912528
+		summarizeBy: none
+		sourceColumn: DiiS
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'User Account live'
+		dataType: string
+		lineageTag: 2e0c8231-a75b-4323-8d17-820b09606001
+		summarizeBy: none
+		sourceColumn: User Account live
+
+		annotation SummarizationSetBy = Automatic
+
+	column Trim
+		dataType: string
+		lineageTag: 4a1a6547-864c-4344-91f9-52575d78773e
+		summarizeBy: none
+		sourceColumn: Trim
+
+		annotation SummarizationSetBy = Automatic
+
+	column Index
+		dataType: int64
+		formatString: 0
+		lineageTag: f7387929-7483-4934-83b4-540eb6ed47fb
+		summarizeBy: sum
+		sourceColumn: Index
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Logins in the Last Quarter 1/11/23 31/3/24'
+		dataType: string
+		lineageTag: d7f22df9-4af4-41b1-a106-a27029938c2c
+		summarizeBy: none
+		sourceColumn: Logins in the Last Quarter 1/11/23 31/3/24
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'DiiS Users' = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(Web.Contents("https://nhsdorsetccg.sharepoint.com/sites/IntelligentWorkingProgrammeIWP-InformationGovernanceIG/Shared%20Documents/Information%20Governance%20(IG)/Role%20Based%20Access%20Requests/DiiS%20-%20User%20Based%20Access%20Requests%20v0.1.xlsx"), null, true),
+				    Form_Sheet = Source{[Item="Form",Kind="Sheet"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(Form_Sheet,{{"Column1", type any}, {"Column2", type any}, {"Column3", type any}, {"Column4", type text}, {"Column5", type text}, {"Column6", type text}, {"Column7", type text}, {"Column8", type text}, {"Column9", type text}, {"Column10", type text}, {"Column11", type text}, {"Column12", type text}, {"Column13", type text}, {"Column14", type any}, {"Column15", type any}, {"Column16", type any}, {"Column17", type any}, {"Column18", type text}, {"Column19", type text}, {"Column20", type text}, {"Column21", type any}, {"Column22", type text}, {"Column23", type text}, {"Column24", type text}, {"Column25", type text}, {"Column26", type text}, {"Column27", type text}, {"Column28", type text}, {"Column29", type any}, {"Column30", type any}, {"Column31", type text}, {"Column32", type any}, {"Column33", type any}, {"Column34", type any}, {"Column35", type text}, {"Column36", type any}, {"Column37", type any}, {"Column38", type text}, {"Column39", type any}, {"Column40", type any}, {"Column41", type any}, {"Column42", type any}, {"Column43", type any}, {"Column44", type text}, {"Column45", type any}, {"Column46", type text}, {"Column47", type text}, {"Column48", type text}, {"Column49", type any}, {"Column50", type any}, {"Column51", type text}, {"Column52", type text}, {"Column53", type text}, {"Column54", type any}, {"Column55", type any}, {"Column56", type text}, {"Column57", type text}, {"Column58", type text}}),
+				    #"Removed Top Rows" = Table.Skip(#"Changed Type",1),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Removed Top Rows", [PromoteAllScalars=true]),
+				    #"Removed Duplicates" = Table.Distinct(#"Promoted Headers", {"Work E-Mail Address"}),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Removed Duplicates",{{"Ref", Int64.Type}, {"Start time", type any}, {"Completion time", type any}, {"Name", type text}, {"Job Title / Role", type text}, {"Work E-Mail Address", type text}, {"Organisation", type text}, {"Please provide a justification reason for accessing DiiS Reports", type text}, {"Please provide additional context to explain your selection in Q5", type text}, {"Do you need access to specialist reports / workspaces", type text}, {"Please include the name of your DiiS contact for the specialist report access", type text}, {"High Priority", type text}, {"Approved By", type text}, {"Added to Azure", type date}, {"Added to Group", type date}, {"Access to WCA Workspace ONLY", type any}, {"Access to SWASFT Workspace ONLY", type any}, {"Access to Medical Examiners Workspace ONLY", type text}, {"Access to SecondaryCareContractMonitoring ONLY", type text}, {"Access SW Endsocopy Workspace", type text}, {"Access Vulnerable Populations Workspace", type any}, {"Access Diagnostics Report ONLY", type text}, {"Notes", type text}, {"Account access e-mail sent", type text}, {"Former CCG email address", type text}, {"Drop In Invite Sent", type text}, {"System Sponsor", type text}, {"NDA Signed", type text}, {"DateAccountCreated", type date}, {"MonthsSinceCreation", Int64.Type}, {"Temporary Access Removal Date", type text}, {"Date account closed/deleted/Pending", type any}, {"Date last used at Audit date 31/5/2022", type any}, {"Audit months dif at Audit date 31/5/2022", type any}, {"Audit outcome at data 31/7/2022", type text}, {"Date last used at Audit date 24/8/2022", type any}, {"Audit months dif at Audit date 24/8/2022", type any}, {"Audit outcome at data 24/8/2022", type text}, {"OrganisationName", type any}, {"OrganisationalType", type any}, {"Date last used at Audit date 1/12/22", type any}, {"Audit months dif at Audit date 1/12/22", type any}, {"Audit outcome at data 1/12/22", type any}, {"Check 1/12/22", type text}, {"Date last used at Audit date 13/3/23", type any}, {"Audit months dif at Audit date 13/3/23", type text}, {"Audit outcome at data 13/3/23", type text}, {"Check 13/3/23", type text}, {"Date last used at Audit date 12/6/23", type date}, {"Audit months dif at Audit date 12/6/23", Int64.Type}, {"Audit outcome at data 12/6/23", type text}, {"Check 12/6/23", type text}, {"Check 12/6/232", type text}, {"Date last used at Audit date 2/10/23", type any}, {"Audit months dif at Audit date 2/10/23", Int64.Type}, {"Audit outcome at data 2/10/23", type text}, {"Check 2/10/23", type text}, {"Check 2/10/232", type text}, {"Rational Organisation", type any}, {"Overaching name", type any}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type1",{{"Organisation", "Organisation 1"}, {"Rational Organisation", "Organisation"}}),
+				    #"Filtered Rows" = Table.SelectRows(#"Renamed Columns", each ([User Account live] = "Y")),
+				    #"Inserted Trimmed Text" = Table.AddColumn(#"Filtered Rows", "Trim", each Text.Trim([#"Work E-Mail Address"]), type text),
+				    #"Removed Duplicates1" = Table.Distinct(#"Inserted Trimmed Text", {"Work E-Mail Address"}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Removed Duplicates1",{"Ref"}),
+				    #"Filtered Rows1" = Table.SelectRows(#"Removed Columns", each true),
+				    #"Added Index" = Table.AddIndexColumn(#"Filtered Rows1", "Index", 1, 1, Int64.Type)
+				in
+				    #"Added Index"
+
+	annotation PBI_ResultType = Table
+

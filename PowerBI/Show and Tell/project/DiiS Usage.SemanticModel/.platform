@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "DiiS Usage"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "1c43155f-d6e2-4daf-a164-8415cd3a53e7"
+  }
+}

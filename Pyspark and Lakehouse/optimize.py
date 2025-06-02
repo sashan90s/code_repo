@@ -1,0 +1,1 @@
+https://learn.microsoft.com/en-us/fabric/data-engineering/delta-optimization-and-v-order?tabs=pyspark

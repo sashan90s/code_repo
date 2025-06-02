@@ -1,0 +1,46 @@
+table Users
+	lineageTag: 77704001-6046-4ae9-bcb4-a0331430296b
+
+	column UsersEmail
+		lineageTag: 5ce38b2e-2df0-4758-9a18-28dad07a0d8b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [UsersEmail]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Work E-Mail Address'
+		lineageTag: 3b089720-bff0-4cb6-84c6-60e5267d5c18
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: DiiS Users[Work E-Mail Address]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Org
+		lineageTag: 061e6f6e-7274-411f-b958-b6ae35e9a34b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Org]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Users = calculated
+		mode: import
+		source = ```
+				ADDCOLUMNS(
+				                    SUMMARIZE(
+				                        'DiiS Users', 'DiiS Users'[Work E-Mail Address]), -- group by condition
+				                        "UsersEmail", CALCULATE(FIRSTNONBLANK('DiiS Users'[Work E-Mail Address],1)), 
+				                        "Org", CALCULATE(FIRSTNONBLANK('DiiS Users'[Organisation],1)
+				                            )
+				                    )
+				
+				/*
+				This is not a very good practice to create Calculated Tables,
+				Created only for this demonstraiton purpose
+				*/
+				```
+
+	annotation PBI_Id = 9c4c03e2918040dcabc353d458068765
+

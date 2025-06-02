@@ -1,0 +1,74 @@
+cultureInfo en-GB
+
+	linguisticMetadata =
+			{
+			  "Version": "2.0.0",
+			  "Language": "en-US",
+			  "Entities": {
+			    "model_vw_dimwessexgpsurgery.primarycarenetwork": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "model vw_DimWessexGpSurgery",
+			          "ConceptualProperty": "PrimaryCareNetwork"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "PCN": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "model_vw_dimwessexgpsurgery.gpsurgeryname": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "model vw_DimWessexGpSurgery",
+			          "ConceptualProperty": "GpSurgeryName"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Surgery": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "model_vw_dimwessexgpsurgery.localdeliverysystem": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "model vw_DimWessexGpSurgery",
+			          "ConceptualProperty": "LocalDeliverySystem"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "LDS": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    }
+			  }
+			}
+		contentType: json
+

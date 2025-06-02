@@ -1,0 +1,52 @@
+model Model
+	culture: en-GB
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-GB
+	dataAccessOptions
+		fastCombine
+		legacyRedirects
+		returnErrorValuesAsNull
+
+/// Errors in queries that were loaded on 19/10/2023 14:45:51.
+queryGroup 'Query Errors - 19/10/2023 14:45:51'
+
+	annotation PBI_QueryGroupOrder = 0
+
+/// Errors in queries that were loaded on 23/10/2023 11:36:38.
+queryGroup 'Query Errors - 23/10/2023 11:36:38'
+
+	annotation PBI_QueryGroupOrder = 1
+
+/// Errors in queries that were loaded on 12/04/2024 16:13:01.
+queryGroup 'Query Errors - 12/04/2024 16:13:01'
+
+	annotation PBI_QueryGroupOrder = 2
+
+/// Errors in queries that were loaded on 12/04/2024 16:19:34.
+queryGroup 'Query Errors - 12/04/2024 16:19:34'
+
+	annotation PBI_QueryGroupOrder = 3
+
+annotation PBIDesktopVersion = 2.143.878.0 (25.05)+b20aa3b866ec1b70879135a4e60e4b1301c75b21
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["HTG MDS","Errors in HTG MDS","All","Errors in All","Azure Log Analytics","DiiS Users","Errors in DiiS Users","Errors in DiiS Users (2)"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table DateTableTemplate_f237f843-7b71-486a-93dc-f4c811437fce
+ref table 'Azure Log Analytics'
+ref table LocalDateTable_3447a968-3d6b-4e2f-a128-9eafba9f5642
+ref table LocalDateTable_75fb14fe-2eff-4bcb-b767-862f66cf68fe
+ref table 'DiiS Users'
+ref table LocalDateTable_2456964e-19be-4195-8584-1c3257c6315f
+ref table LocalDateTable_3bceced7-b729-4a22-ba18-5c84120783bc
+ref table LocalDateTable_3cbb877f-4949-4220-8bf1-1a4085e02db4
+ref table LocalDateTable_13fc65af-9944-41dc-bf83-8f5b6dd3cf8c
+ref table Users
+
+ref role Untitled
+
+ref cultureInfo en-GB
+

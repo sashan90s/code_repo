@@ -1,0 +1,5 @@
+AzureDiagnostics
+| where LogicalServerName_s == "diis-live-sqlserver"
+| where TimeGenerated >= ago(30d)
+| where Category  == "deadlock" //"QueryStoreRuntimeStatistics"
+//| summarize count() by Category

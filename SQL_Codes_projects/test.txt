@@ -1,0 +1,156 @@
+CREATE TABLE clinical.EmergencyCare
+(
+	 EmergencyCareKey																BIGINT IDENTITY(1,1) NOT NULL
+	,EmergencyCareId																VARCHAR(100) NOT NULL
+	,SourceSystemKey																SMALLINT NOT NULL
+	,ProviderCode																	VARCHAR(16) NOT NULL
+	,[Provider]																		VARCHAR(50) NULL
+	,DepartmentTypeCode																VARCHAR(255) NULL
+	,DepartmentType																	VARCHAR(50) NULL
+	,OrganisationCodeCommissioner													VARCHAR(16) NULL
+	,PersonId																		VARCHAR(64) NULL
+	,PersonKey																		INT NULL
+	,Age																			SMALLINT NULL
+	,LocalPatientIdentifier															VARCHAR(64) NULL
+	,GeneralPractice																VARCHAR(16) NULL
+	,[Site]																			VARCHAR(255) NULL
+	,OutputArea																		CHAR(9) NULL
+	,LowerSuperOutputAreaCode														VARCHAR(50) NULL
+	,LocalAuthorityCode																VARCHAR(50) NULL
+	,LocalAuthorityName																VARCHAR(50) NULL
+	,PostcodeDistrict																VARCHAR(16) NULL
+	,ResidenceCcg																	VARCHAR(16) NULL
+	,ResidenceCcgDescription														VARCHAR(200) NULL
+	,EthnicCategory																	VARCHAR(50) NULL
+	,EthnicCategoryDescription														VARCHAR(100) NULL
+	,ArrivalDate																	DATE NULL
+	,ArrivalTime																	TIME(0) NULL
+	,ArrivalMode																	BIGINT NULL
+	,ArrivalModeDescription															VARCHAR(500) NULL
+	,ArrivalPlanned																	BIT NULL
+	,InitialAssessmentDate															DATE NULL
+	,InitialAssessmentTime															TIME(0) NULL
+	,SeenForTreatmentDate															DATE NULL
+	,SeenForTreatmentTime															TIME(0) NULL
+	,ConclusionDate																	DATE NULL
+	,ConclusionTime																	TIME(0) NULL
+	,DepartureDate																	DATE NULL
+	,DepartureTime																	TIME(0) NULL
+	,DecisionToAdmitDate															DATE NULL
+	,DecisionToAdmitTime															TIME(0) NULL
+	,DecisionToAdmitTimeSinceArrival												INT NULL
+	,DiagnosesCode																	VARCHAR(1000) NULL
+	,DiagnosesDescription															VARCHAR(500) NULL
+	,DiagnosesCode1																	BIGINT NULL
+	,DiagnosesDescription1															VARCHAR(500) NULL
+	,DiagnosesCode2																	BIGINT NULL
+	,DiagnosesDescription2															VARCHAR(500) NULL
+	,DiagnosesCode3																	BIGINT NULL
+	,DiagnosesDescription3															VARCHAR(500) NULL
+	,InvestigationCode																VARCHAR(1000) NULL
+	,InvestigationDescription														VARCHAR(500) NULL
+	,InvestigationCode1																BIGINT NULL
+	,InvestigationDescription1														VARCHAR(500) NULL
+	,InvestigationCode2																BIGINT NULL
+	,InvestigationDescription2														VARCHAR(500) NULL
+	,TreatmentCode																	VARCHAR(1000) NULL
+	,TreatmentDescription															VARCHAR(500) NULL
+	,TreatmentCode1																	BIGINT NULL
+	,TreatmentDescription1															VARCHAR(500) NULL
+	,TreatmentCode2																	BIGINT NULL
+	,TreatmentDescription2															VARCHAR(500) NULL
+	,TreatmentCode3																	BIGINT NULL
+	,TreatmentDescription3															VARCHAR(500) NULL
+	,HealthResourceGroup															VARCHAR(16) NULL
+	,AttendanceCategory																VARCHAR(50) NULL
+	,AttendanceCategoryDescription													VARCHAR(100) NULL
+	,AmbulanceIncidentNumber														VARCHAR(50) NULL
+	,ConveyingAmbulanceTrust														VARCHAR(50) NULL
+	,ConveyingAmbulanceTrustDescription												VARCHAR(100) NULL
+	,ReferredToService																VARCHAR(1000) NULL
+	,ReferredToServiceDescription													VARCHAR(500) NULL
+	,ReferredToService1																BIGINT NULL
+	,ReferredToService1Description													VARCHAR(500) NULL
+	,DischargeStatus																BIGINT NULL
+	,DischargeStatusDescription														VARCHAR(500) NULL
+	,DischargeDestination															BIGINT NULL
+	,DischargeDestinationDescription												VARCHAR(500) NULL
+	,ChiefComplaint																	BIGINT NULL
+	,ChiefComplaintDescription														VARCHAR(500) NULL
+	,Acuity																			BIGINT NULL
+	,AcuityDescription																VARCHAR(500) NULL
+	,ComorbiditiesCode																VARCHAR(1000) NULL
+	,ComorbiditiesCodeDescription													VARCHAR(500) NULL
+	,ComorbiditiesCode1																BIGINT NULL
+	,ComorbiditiesCode1Description													VARCHAR(500) NULL
+	,ComorbiditiesCode2																BIGINT NULL
+	,ComorbiditiesCode2Description													VARCHAR(500) NULL
+	,AecRelated																		VARCHAR(255) NULL
+	,EquivalentAeInvestigationCode													VARCHAR(255) NULL
+	,EquivalentAeInvestigationCodeDescription										VARCHAR(255) NULL
+	,EquivalentAeInvestigationCode1													VARCHAR(50) NULL
+	,EquivalentAeInvestigationCode1Description										VARCHAR(255) NULL
+	,EquivalentAeInvestigationCode2													VARCHAR(50) NULL
+	,EquivalentAeInvestigationCode2Description										VARCHAR(255) NULL
+	,EquivalentAeTreatmentCode														VARCHAR(255) NULL
+	,EquivalentAeTreatmentCodeDescription											VARCHAR(100) NULL
+	,EquivalentAeTreatmentCode1														VARCHAR(50) NULL
+	,EquivalentAeTreatmentCode1Description											VARCHAR(100) NULL
+	,EquivalentAeTreatmentCode2														VARCHAR(50) NULL
+	,EquivalentAeTreatmentCode2Description											VARCHAR(100) NULL
+	,EquivalentAeTreatmentCode3														VARCHAR(50) NULL
+	,EquivalentAeTreatmentCode3Description											VARCHAR(100) NULL
+	,Tariff																			NUMERIC(18,6) NULL
+	,FinalPrice																		NUMERIC(18,6) NULL
+	,ClinicalCodedScoredAssessmentToolTypeCode										VARCHAR(1000) NULL
+	,ClinicalCodedScoredAssessmentToolTypeCodeDescription							VARCHAR(500) NULL
+	,ClinicalCodedScoredAssessmentToolTypeCode1										BIGINT NULL  
+	,ClinicalCodedScoredAssessmentToolTypeCode1Description							VARCHAR(500) NULL
+	,ClinicalCodedScoredAssessmentToolTypeCode2										BIGINT NULL
+	,ClinicalCodedScoredAssessmentToolTypeCode2Description							VARCHAR(500) NULL
+	,ClinicalCodedScoredAssessmentToolTypeCode3										BIGINT NULL
+	,ClinicalCodedScoredAssessmentToolTypeCode3Description							VARCHAR(500) NULL
+	,ClinicalCodedScoredAssessmentPersonScore										VARCHAR(1000) NULL
+	,ClinicalCodedScoredAssessmentPersonScoreDescription							VARCHAR(500) NULL
+	,ClinicalCodedScoredAssessmentPersonScore1										BIGINT NULL
+	,ClinicalCodedScoredAssessmentPersonScore1Description							VARCHAR(500) NULL
+	,ClinicalCodedScoredAssessmentPersonScore2										BIGINT NULL
+	,ClinicalCodedScoredAssessmentPersonScore2Description							VARCHAR(500) NULL
+	,ClinicalCodedScoredAssessmentPersonScore3										BIGINT NULL
+	,ClinicalCodedScoredAssessmentPersonScore3Description							VARCHAR(500) NULL
+	,ValidationTimestamp															VARCHAR(1000) NULL
+	,ValidationTimestampDescription													VARCHAR(500) NULL
+	,ValidationTimestamp1															DATETIME2(0) NULL
+	,ValidationTimestamp1Description												VARCHAR(500) NULL
+	,ValidationTimestamp2															DATETIME2(0) NULL
+	,ValidationTimestamp2Description												VARCHAR(500) NULL
+	,ValidationTimestamp3															DATETIME2(0) NULL
+	,ValidationTimestamp3Description												VARCHAR(500) NULL
+	,ClinicalCodedFindingsCode														VARCHAR(1000) NULL
+	,ClinicalCodedFindingsCodeDescription											VARCHAR(500) NULL
+	,ClinicalCodedFindingsCode1														BIGINT NULL  
+	,ClinicalCodedFindingsCode1Description											VARCHAR(500) NULL
+	,ClinicalCodedFindingsCode2														BIGINT NULL  
+	,ClinicalCodedFindingsCode2Description											VARCHAR(500) NULL
+	,ClinicalCodedFindingsCode3														BIGINT NULL  
+	,ClinicalCodedFindingsCode3Description											VARCHAR(500) NULL
+	,ClinicalCodedFindingsCodeTimestamp												VARCHAR(1000) NULL
+	,ClinicalCodedFindingsCodeTimestampDescription									VARCHAR(500) NULL
+	,ClinicalCodedFindingsCodeTimestamp1											DATETIME2(0) NULL
+	,ClinicalCodedFindingsCodeTimestamp1Description									VARCHAR(500) NULL
+	,ClinicalCodedFindingsCodeTimestamp2											DATETIME2(0) NULL
+	,ClinicalCodedFindingsCodeTimestamp2Description									VARCHAR(500) NULL
+	,ClinicalCodedFindingsCodeTimestamp3											DATETIME2(0) NULL
+	,ClinicalCodedFindingsCodeTimestamp3Description									VARCHAR(500) NULL
+	,AccommodationStatus															VARCHAR(255) NULL
+	,IsActive																		BIT NOT NULL
+	,InsertUser																		VARCHAR(100) NOT NULL
+	,InsertTime																		DATETIME2(0) NOT NULL
+	,UpdateUser																		VARCHAR(100) NOT NULL
+	,UpdateTime																		DATETIME2(0) NOT NULL
+	,RecordVersion																	VARBINARY(8000) CONSTRAINT DF_EmergencyCare_RecordVersion DEFAULT 0 NOT NULL
+	,CONSTRAINT PK_EmergencyCare PRIMARY KEY (EmergencyCareKey ASC)
+	,CONSTRAINT UQ_EmergencyCare UNIQUE (EmergencyCareId, ProviderCode)
+);
+
+

@@ -110,6 +110,55 @@ DEEP CLONE man_cata.man_schema.deltatbl;
 
 ---
 
+
+## VACCUM
+
+VACCUM YOURTABLENAME;
+BY DEAFULT 7 DAYS DATA CAN BE REMOVED FROM THE CACHE LOG.
+but now you can change that option manually.
+
+SET spark.databricks.delta.retentionDurationCheck.enabled = false;
+VACUUM your_table_name RETAIN 48 HOURS;
+
+## Optimize, Zorder, 
+
+
+### Optimize and Z-Order in Delta Lake
+
+- **OPTIMIZE:** Compacts small files into larger ones for faster reads.
+
+```sql
+OPTIMIZE my_table;
+```
+
+- **ZORDER:** Improves data skipping by co-locating related information in the same set of files. Useful for columns often used in filters.
+
+```sql
+OPTIMIZE my_table
+ZORDER BY (column1, column2);
+
+- Use `ZORDER` on columns that are frequently used in WHERE clauses to speed up queries.
+
+## Liquid Clustering
+
+```sql
+-- Create an empty table
+CREATE TABLE table1(col0 int, col1 string) CLUSTER BY (col0);
+```
+
+```sql
+-- Using a CTAS statement
+CREATE EXTERNAL TABLE table2 CLUSTER BY (col0)  -- specify clustering after table name, not in subquery
+LOCATION 'table_location'
+AS SELECT * FROM table1;
+```
+
+```sql
+-- Using a LIKE statement to copy configurations
+CREATE TABLE table3 LIKE table1;
+```
+
+
 ## SCIM Provisioning
 
 (Provide details or steps for SCIM provisioning here.)

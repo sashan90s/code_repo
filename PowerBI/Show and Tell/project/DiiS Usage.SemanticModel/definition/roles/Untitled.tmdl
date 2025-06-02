@@ -1,0 +1,9 @@
+role Untitled
+	modelPermission: read
+
+	tablePermission 'DiiS Users'
+
+	tablePermission Users = [UsersEmail] == USERPRINCIPALNAME()
+
+	annotation PBI_Id = 6cb59824f1ee4e1fae0770e85e0d45eb
+
