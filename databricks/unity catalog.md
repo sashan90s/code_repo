@@ -159,6 +159,99 @@ CREATE TABLE table3 LIKE table1;
 ```
 
 
+##Schema Evolution
+
+-- When writing data, enable schema evolution
+ALTER TABLE my_table
+SET TBLPROPERTIES ('delta.schema.autoMerge.enabled' = 'true');
+
+-- Now, you can append data with new columns
+INSERT INTO my_table
+SELECT * FROM another_data_source;
+
+
+## Delta Live Table
+
+1. Create a Streaming view of Source Data
+2. Create a Streaming Table of Streaming View
+3. Create Materialized View of Gold Layer
+
+Only the Materialised view will have data read stats at the end, 
+becz two tables before only reads delta data meaning append only data..
+
+Another Scene
+New DLT Pipeline
+
+Source 1       Strm Table
+            >              >  Mat View    > Strm Table
+Source 2 >     Strm Table
+
+
+## Delta Live Table Example: Bronze Streaming Table
+
+Below is an example of a DLT Python pipeline that creates a Bronze streaming table for customer data. This uses the `@dlt.table` decorator to define a streaming table.
+
+```python
+import dlt
+from pyspark.sql.functions import col
+
+# streaming table - dlt.table + readStream
+# Mat View - dlt.tab;e + read
+# 
+# You cannot create streaming table of Mat View
+# streaming table
+@dlt.table(
+    name="bronze_customers",
+    comment="Bronze streaming table for raw customer data."
+)
+def bronze_customers():
+        # Read from a Databricks catalog source table (sample path: catalog.schema.table)
+        df = spark.readStream.table("main.bronze.customers")
+        return df
+
+@dlt.table(
+    name="bronze_customers_new",
+    comment="Bronze streaming table for raw customer data."
+)
+def bronze_customers():
+        # Read from a Databricks catalog source table (sample path: catalog.schema.table)
+        df = spark.readStream.table("main.bronze.customers_new")
+        return df
+
+
+#Materialized View - silver table
+
+@dlt.table(
+    name="silver_customers_union",
+    comment="Silver materialized view combining both bronze customer tables."
+)
+def silver_customers():
+    df1 = spark.read.table("LIVE.bronze_customers")
+    df2 = spark.read.table("LIVE.bronze_customers_new")
+    # Union the two bronze tables and drop duplicates if needed
+    df = df1.unionByName(df2)
+    return df
+
+# Materialized View - Gold View
+
+@dlt.table(
+    name="gold_customers",
+    comment="Silver materialized view combining both bronze customer tables."
+)
+def silver_customers():
+
+    df = spark.read.table("LIVE.silver_customers")
+    return df
+
+
+```
+
+- Replace the path `/mnt/source-data/customers/` with your actual data location.
+- This table ingests raw customer data as a streaming source into the Bronze layer.
+- You can use this as the first step in your medallion architecture pipeline.
+
+
+
 ## SCIM Provisioning
 
 (Provide details or steps for SCIM provisioning here.)
