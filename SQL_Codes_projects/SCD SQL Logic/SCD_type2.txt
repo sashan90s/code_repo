@@ -1,0 +1,32 @@
+-- 1. Expire current records where data has changed
+UPDATE tgt
+SET 
+    EndDate = GETDATE(),
+    IsCurrent = 0
+FROM dbo.DimPatient tgt
+INNER JOIN StgPatient src
+    ON tgt.PatientID = src.PatientID
+WHERE tgt.IsCurrent = 1
+  AND (
+        ISNULL(tgt.Name, '') <> ISNULL(src.Name, '') 
+     OR ISNULL(tgt.Address, '') <> ISNULL(src.Address, '')
+      );
+
+-- 2. Insert new records (for new and changed patients)
+INSERT INTO dbo.DimPatient (
+    PatientID, Name, Address, StartDate, EndDate, IsCurrent
+)
+SELECT
+    src.PatientID,
+    src.Name,
+    src.Address,
+    GETDATE(),      -- StartDate (could use your ETL batch date)
+    NULL,           -- EndDate (NULL = current)
+    1               -- IsCurrent
+FROM StgPatient src
+LEFT JOIN dbo.DimPatient tgt
+    ON src.PatientID = tgt.PatientID AND tgt.IsCurrent = 1
+WHERE tgt.PatientID IS NULL;
+
+-- for further understanding 
+https://chatgpt.com/share/684b61bd-2130-8003-83af-1b958611b301

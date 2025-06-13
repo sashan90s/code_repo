@@ -1,0 +1,21 @@
+-- 1. Update existing patients if data changed
+UPDATE tgt
+SET 
+    tgt.Name = src.Name,
+    tgt.Address = src.Address
+FROM dbo.DimPatient tgt
+INNER JOIN StgPatient src
+    ON tgt.PatientID = src.PatientID
+WHERE
+    ISNULL(tgt.Name, '') <> ISNULL(src.Name, '')
+    OR ISNULL(tgt.Address, '') <> ISNULL(src.Address, '');
+
+-- 2. Insert new patients
+INSERT INTO dbo.DimPatient (PatientID, Name, Address)
+SELECT src.PatientID, src.Name, src.Address
+FROM StgPatient src
+LEFT JOIN dbo.DimPatient tgt
+    ON src.PatientID = tgt.PatientID
+WHERE tgt.PatientID IS NULL;
+
+https://chatgpt.com/share/684b61bd-2130-8003-83af-1b958611b301
