@@ -1,3 +1,21 @@
+
+-- you first of all need to get the latest of per source unique key
+WITH SourceDeduped AS (
+    SELECT *,
+           ROW_NUMBER() OVER (PARTITION BY id ORDER BY /*timestamp/sequence/row*/ ) AS rn
+    FROM source
+)
+, LatestSource AS (
+    SELECT id, data
+    FROM SourceDeduped
+    WHERE rn = 1  -- or rn = highest/lowest depending on business logic
+)
+-- Then use LatestSource for SCD2 steps!
+
+
+
+
+
 -- 1. Expire current records where data has changed
 UPDATE tgt
 SET 
