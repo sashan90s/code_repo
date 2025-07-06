@@ -1,4 +1,3 @@
 **/.pbi/localSettings.json
 **/.pbi/cache.abf
-**/venv/
-**/.env/
+Docker vs dbt vs kubernetes\dbt core\dbt_fabric\venv
