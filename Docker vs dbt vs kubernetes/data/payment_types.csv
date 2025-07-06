@@ -1,0 +1,16 @@
+PaymentTypeID,PaymentMethod
+1,PayPal
+2,Cash
+3,Debit Card
+4,Cash
+5,PayPal
+6,Cash
+7,PayPal
+8,Credit Card
+9,Debit Card
+10,Cash
+11,Credit Card
+12,PayPal
+13,Bank Transfer
+14,Credit Card
+15,Debit Card
