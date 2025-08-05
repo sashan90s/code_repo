@@ -1,38 +1,3 @@
---=================================================================================
---Created by:	Jordan Butler
---Date:			24th March 2023
---Description:	Loads Emergency Care data from staging into the Ods.
---Usage:		EXEC cxsus.usp_LoadEcdsToOds;
---=================================================================================
-CREATE PROCEDURE cxsus.usp_LoadEcdsToOds
-AS
-SET NOCOUNT ON;
-DECLARE	 @ProcedureName		SYSNAME = OBJECT_SCHEMA_NAME(@@PROCID) + '.' + OBJECT_NAME(@@PROCID)
-		,@StartTime			DATETIME2(0) = SYSDATETIME()
-		,@EndTime			DATETIME2(0)
-		,@ErrorMessage		VARCHAR(1000)
-		,@Inserts			INT = 0
-		,@Updates			INT = 0
-		,@Deletes			INT = 0
-		,@Success			BIT = 0
-		,@LogId				INT
-		,@InsertUpdateUser	VARCHAR(100) = ORIGINAL_LOGIN()
-		,@InsertUpdateTime	DATETIME2(0) = SYSDATETIME()
-		,@SourceSystemKey	INT = CAST([$(OdsDbName)].dbo.udf_GetSourceSystemKey('CXSUS') AS INT)
-		,@24MonthsAgo		DATE = DATEADD(MONTH, -24, DATEADD(DAY,1,EOMONTH(SYSDATETIME(),-1)));
-
--- Log the start of the load
-EXEC [$(LoggingDbName)].dbo.usp_CreateEtlLog @PackageName			= @ProcedureName
-                                            ,@SourceObjectType		= 'Table'
-                                            ,@SourceObjectName		= '$(DatabaseName).cxsus.Ecds'
-                                            ,@DestinationObjectType = 'Table'
-                                            ,@DestinationObjectName = '$(OdsDbName).cxsus.EmergencyCare'
-                                            ,@StartTime				= @StartTime
-										    ,@LogId					= @LogId OUTPUT;
-
--- Create a temporary table variable to hold the output actions.
-DECLARE @SummaryOfChanges TABLE(Change VARCHAR(20));
-
 BEGIN TRY
 
 	DROP TABLE IF EXISTS #Snomed;
@@ -40,10 +5,10 @@ BEGIN TRY
 	SELECT   c.ConceptId
 	        ,d.Term
 	INTO #Snomed
-	FROM [$(OdsDbName)].snomed.Concept AS c
-		INNER JOIN [$(OdsDbName)].snomed.ConceptDescriptionMapping AS cdm
+	FROM [ODS].snomed.Concept AS c
+		INNER JOIN [ODS].snomed.ConceptDescriptionMapping AS cdm
 	   		ON c.ConceptKey = cdm.ConceptKey
-		INNER JOIN [$(OdsDbName)].snomed.[Description] AS d
+		INNER JOIN [ODS].snomed.[Description] AS d
 	   		ON cdm.DescriptionKey = d.DescriptionKey
 	   		AND d.IsActive = 1
 	WHERE c.IsActive = 1;
@@ -163,7 +128,7 @@ SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 	INTO #Ecds
 	FROM cxsus.Ecds;
 
-	MERGE INTO [$(OdsDbName)].cxsus.EmergencyCare AS TARGET
+	MERGE INTO [ODS].cxsus.EmergencyCare AS TARGET
 	USING	(SELECT	 ec.EmergencyCareId
 			,ec.SourceSystemKey
 			,ec.ProviderCode
@@ -322,175 +287,176 @@ SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 			,ec.ClinicalCodedFindingsCodeTimestamp1
 			,ec.ClinicalCodedFindingsCodeTimestamp2
 			,ec.ClinicalCodedFindingsCodeTimestamp3
-			,HASHBYTES('SHA2_512', CONCAT(	 ec.EmergencyCareId							,'|'
-											,ec.SourceSystemKey							,'|'
-											,ec.ProviderCode							,'|'
-											,o.ProviderShortName						,'|'
-											,ec.DepartmentTypeCode						,'|'
-											,d.AeDepartmentDescriptionShort				,'|'
-											,ec.OrganisationCodeCommissioner			,'|'
-											,ec.PersonId								,'|'
-											,ec.Age										,'|'
-											,ec.Gender									,'|'
-											,ec.LocalPatientIdentifier					,'|'
-											,ec.GeneralPractice							,'|'
-											,ec.[Site]									,'|'
-											,ec.OutputArea								,'|'
-											,ec.LowerSuperOutputAreaCode				,'|'
-											,olwm.LocalAuthorityCode					,'|'
-											,olwm.LocalAuthorityName					,'|'
-											,ec.PostcodeDistrict						,'|'
-											,ec.ResidenceCcg							,'|'
-											,po.OrganisationName						,'|'
-											,eth.EthnicCategory							,'|'
-											,eth.EthnicCategory							,'|'
-											,ec.AccommodationStatus						,'|'
-											,acoms.Term									,'|'
-											,ec.ArrivalDate								,'|'
-											,ec.ArrivalTime								,'|'
-											,ec.ArrivalPlanned							,'|'
-											,ec.ArrivalMode								,'|'
-											,am.Term									,'|'
-											,ec.ReferredToServiceDate					,'|'
-											,ec.ReferredToServiceTime					,'|'
-											,ec.InitialAssessmentDate					,'|'
-											,ec.InitialAssessmentTime					,'|'
-											,ec.SeenForTreatmentDate					,'|'
-											,ec.SeenForTreatmentTime					,'|'
-											,ec.ConclusionDate							,'|'
-											,ec.ConclusionTime							,'|'
-											,ec.DepartureDate							,'|'
-											,ec.DepartureTime							,'|'
-											,ec.DecisionToAdmitDate						,'|'
-											,ec.DecisionToAdmitTime						,'|'
-											,ec.DecisionToAdmitTimeSinceArrival			,'|'
-											,ec.DiagnosesCode							,'|'
-											,di.Term									,'|'
-											,ec.DiagnosesCode1							,'|'
-											,di1.Term									,'|'
-											,ec.DiagnosesCode2							,'|'
-											,di2.Term									,'|'
-											,ec.DiagnosesCode3							,'|'
-											,di3.Term									,'|'
-											,ec.InvestigationCode						,'|'
-											,i.Term										,'|'
-											,ec.InvestigationCode1						,'|'
-											,i1.Term									,'|'
-											,ec.InvestigationCode2						,'|'
-											,i2.Term									,'|'
-											,ec.TreatmentCode							,'|'
-											,t.Term										,'|'
-											,ec.TreatmentCode1							,'|'
-											,t1.Term									,'|'
-											,ec.TreatmentCode2							,'|'
-											,t2.Term									,'|'
-											,ec.TreatmentCode3							,'|'
-											,t3.Term									,'|'
-											,ec.HealthResourceGroup						,'|'
-											,ec.AttendanceCategory						,'|'
-											,ac.[Description]							,'|'
-											,ec.AmbulanceIncidentNumber					,'|'
-											,ec.ConveyingAmbulanceTrust					,'|'
-											,ec.AttendanceSource						,'|'
-											,ats.Term									,'|'
-											,o2.ProviderShortName						,'|'
-											,ec.ReferredToService						,'|'
-											,rs.Term									,'|'
-											,ec.ReferredToService1						,'|'
-											,rs1.Term									,'|'
-											,ec.DischargeStatus							,'|'
-											,ds.Term									,'|'
-											,ec.DischargeDestination					,'|'
-											,dd.Term									,'|'
-											,ec.ChiefComplaint							,'|'
-											,cc.Term									,'|'
-											,ec.Acuity									,'|'
-											,ay.Term									,'|'
-											,ec.ComorbiditiesCode						,'|'
-											,co.Term									,'|'
-											,ec.ComorbiditiesCode1						,'|'
-											,co1.Term									,'|'
-											,ec.ComorbiditiesCode2						,'|'
-											,co2.Term									,'|'
-											,ec.AecRelated								,'|'
-											,ec.EquivalentAeInvestigationCode			,'|'
-											,iv.[Description]							,'|'
-											,ec.EquivalentAeInvestigationCode1			,'|'
-											,iv1.[Description]							,'|'
-											,ec.EquivalentAeInvestigationCode2			,'|'
-											,iv2.[Description]							,'|'
-											,ec.EquivalentAeTreatmentCode				,'|'
-											,tr.AeTreatment								,'|'
-											,ec.EquivalentAeTreatmentCode1				,'|'
-											,tr1.AeTreatment							,'|'
-											,ec.EquivalentAeTreatmentCode2				,'|'
-											,tr2.AeTreatment							,'|'
-											,ec.EquivalentAeTreatmentCode3				,'|'
-											,tr3.AeTreatment							,'|'
-											,ec.InjuryIntentCode						,'|'
-											,ii.Term									,'|'
-											,ec.InjuryMechanismCode						,'|'
-											,im.Term									,'|'
-											,ec.InjuryPlaceDate							,'|'
-											,ec.InjuryPlaceTime							,'|'
-											,ec.InjuryPlaceCode							,'|'
-											,ipc.Term									,'|'
-											,ec.InjuryActivityStatus					,'|'
-											,ias.Term									,'|'
-											,ec.InjuryActivityType						,'|'
-											,iat.Term									,'|'
-											,ec.AlcoholDrugInvolvementsCode				,'|'
-											,ec.AlcoholDrugInvolvementsCode1			,'|'
-											,ad1.Term									,'|'
-											,ec.AlcoholDrugInvolvementsCode2			,'|'
-											,ad2.Term									,'|'
-											,ec.AlcoholDrugInvolvementsCode3			,'|'
-											,ad3.Term									,'|'
-											,ec.Tariff									,'|'
-											,CONCAT(ec.FinalPrice
-											,ec.ClinicalCodedScoredAssessmentToolTypeCode		,'|'
-											,att.Term											,'|'
-											,ec.ClinicalCodedScoredAssessmentToolTypeCode1		,'|'
-											,att1.Term											,'|'
-											,ec.ClinicalCodedScoredAssessmentToolTypeCode2		,'|'
-											,att2.Term											,'|'
-											,ec.ClinicalCodedScoredAssessmentToolTypeCode3		,'|'
-											,att3.Term											,'|'
-											,ec.ClinicalCodedScoredAssessmentPersonScore		,'|'
-											,aps.Term											,'|'
-											,ec.ClinicalCodedScoredAssessmentPersonScore1		,'|'
-											,aps1.Term											,'|'
-											,ec.ClinicalCodedScoredAssessmentPersonScore2		,'|'
-											,aps2.Term											,'|'
-											,ec.ClinicalCodedScoredAssessmentPersonScore3		,'|'
-											,aps3.Term											,'|'
-											,ec.ValidationTimestamp								,'|'
-											,ec.ValidationTimestamp1							,'|'
-											,ec.ValidationTimestamp2							,'|'
-											,ec.ValidationTimestamp3							,'|'
-											,ec.ClinicalCodedFindingsCode						,'|'
-											,cfc.Term											,'|'
-											,ec.ClinicalCodedFindingsCode1						,'|'
-											,cfc1.Term											,'|'
-											,ec.ClinicalCodedFindingsCode2						,'|'
-											,cfc2.Term											,'|'
-											,ec.ClinicalCodedFindingsCode3						,'|'
-											,cfc3.Term											,'|'
-											,ec.ClinicalCodedFindingsCodeTimestamp				,'|'
-											,ec.ClinicalCodedFindingsCodeTimestamp1				,'|'
-											,ec.ClinicalCodedFindingsCodeTimestamp2				,'|'
-											,ec.ClinicalCodedFindingsCodeTimestamp3				,'|'											
-											))) AS RecordVersion
+			, NULL AS RecordVersion
+			-- ,HASHBYTES('SHA2_512', CONCAT(	 ec.EmergencyCareId							,'|'
+			-- 								,ec.SourceSystemKey							,'|'
+			-- 								,ec.ProviderCode							,'|'
+			-- 								,o.ProviderShortName						,'|'
+			-- 								,ec.DepartmentTypeCode						,'|'
+			-- 								,d.AeDepartmentDescriptionShort				,'|'
+			-- 								,ec.OrganisationCodeCommissioner			,'|'
+			-- 								,ec.PersonId								,'|'
+			-- 								,ec.Age										,'|'
+			-- 								,ec.Gender									,'|'
+			-- 								,ec.LocalPatientIdentifier					,'|'
+			-- 								,ec.GeneralPractice							,'|'
+			-- 								,ec.[Site]									,'|'
+			-- 								,ec.OutputArea								,'|'
+			-- 								,ec.LowerSuperOutputAreaCode				,'|'
+			-- 								,olwm.LocalAuthorityCode					,'|'
+			-- 								,olwm.LocalAuthorityName					,'|'
+			-- 								,ec.PostcodeDistrict						,'|'
+			-- 								,ec.ResidenceCcg							,'|'
+			-- 								,po.OrganisationName						,'|'
+			-- 								,eth.EthnicCategory							,'|'
+			-- 								,eth.EthnicCategory							,'|'
+			-- 								,ec.AccommodationStatus						,'|'
+			-- 								,acoms.Term									,'|'
+			-- 								,ec.ArrivalDate								,'|'
+			-- 								,ec.ArrivalTime								,'|'
+			-- 								,ec.ArrivalPlanned							,'|'
+			-- 								,ec.ArrivalMode								,'|'
+			-- 								,am.Term									,'|'
+			-- 								,ec.ReferredToServiceDate					,'|'
+			-- 								,ec.ReferredToServiceTime					,'|'
+			-- 								,ec.InitialAssessmentDate					,'|'
+			-- 								,ec.InitialAssessmentTime					,'|'
+			-- 								,ec.SeenForTreatmentDate					,'|'
+			-- 								,ec.SeenForTreatmentTime					,'|'
+			-- 								,ec.ConclusionDate							,'|'
+			-- 								,ec.ConclusionTime							,'|'
+			-- 								,ec.DepartureDate							,'|'
+			-- 								,ec.DepartureTime							,'|'
+			-- 								,ec.DecisionToAdmitDate						,'|'
+			-- 								,ec.DecisionToAdmitTime						,'|'
+			-- 								,ec.DecisionToAdmitTimeSinceArrival			,'|'
+			-- 								,ec.DiagnosesCode							,'|'
+			-- 								,di.Term									,'|'
+			-- 								,ec.DiagnosesCode1							,'|'
+			-- 								,di1.Term									,'|'
+			-- 								,ec.DiagnosesCode2							,'|'
+			-- 								,di2.Term									,'|'
+			-- 								,ec.DiagnosesCode3							,'|'
+			-- 								,di3.Term									,'|'
+			-- 								,ec.InvestigationCode						,'|'
+			-- 								,i.Term										,'|'
+			-- 								,ec.InvestigationCode1						,'|'
+			-- 								,i1.Term									,'|'
+			-- 								,ec.InvestigationCode2						,'|'
+			-- 								,i2.Term									,'|'
+			-- 								,ec.TreatmentCode							,'|'
+			-- 								,t.Term										,'|'
+			-- 								,ec.TreatmentCode1							,'|'
+			-- 								,t1.Term									,'|'
+			-- 								,ec.TreatmentCode2							,'|'
+			-- 								,t2.Term									,'|'
+			-- 								,ec.TreatmentCode3							,'|'
+			-- 								,t3.Term									,'|'
+			-- 								,ec.HealthResourceGroup						,'|'
+			-- 								,ec.AttendanceCategory						,'|'
+			-- 								,ac.[Description]							,'|'
+			-- 								,ec.AmbulanceIncidentNumber					,'|'
+			-- 								,ec.ConveyingAmbulanceTrust					,'|'
+			-- 								,ec.AttendanceSource						,'|'
+			-- 								,ats.Term									,'|'
+			-- 								,o2.ProviderShortName						,'|'
+			-- 								,ec.ReferredToService						,'|'
+			-- 								,rs.Term									,'|'
+			-- 								,ec.ReferredToService1						,'|'
+			-- 								,rs1.Term									,'|'
+			-- 								,ec.DischargeStatus							,'|'
+			-- 								,ds.Term									,'|'
+			-- 								,ec.DischargeDestination					,'|'
+			-- 								,dd.Term									,'|'
+			-- 								,ec.ChiefComplaint							,'|'
+			-- 								,cc.Term									,'|'
+			-- 								,ec.Acuity									,'|'
+			-- 								,ay.Term									,'|'
+			-- 								,ec.ComorbiditiesCode						,'|'
+			-- 								,co.Term									,'|'
+			-- 								,ec.ComorbiditiesCode1						,'|'
+			-- 								,co1.Term									,'|'
+			-- 								,ec.ComorbiditiesCode2						,'|'
+			-- 								,co2.Term									,'|'
+			-- 								,ec.AecRelated								,'|'
+			-- 								,ec.EquivalentAeInvestigationCode			,'|'
+			-- 								,iv.[Description]							,'|'
+			-- 								,ec.EquivalentAeInvestigationCode1			,'|'
+			-- 								,iv1.[Description]							,'|'
+			-- 								,ec.EquivalentAeInvestigationCode2			,'|'
+			-- 								,iv2.[Description]							,'|'
+			-- 								,ec.EquivalentAeTreatmentCode				,'|'
+			-- 								,tr.AeTreatment								,'|'
+			-- 								,ec.EquivalentAeTreatmentCode1				,'|'
+			-- 								,tr1.AeTreatment							,'|'
+			-- 								,ec.EquivalentAeTreatmentCode2				,'|'
+			-- 								,tr2.AeTreatment							,'|'
+			-- 								,ec.EquivalentAeTreatmentCode3				,'|'
+			-- 								,tr3.AeTreatment							,'|'
+			-- 								,ec.InjuryIntentCode						,'|'
+			-- 								,ii.Term									,'|'
+			-- 								,ec.InjuryMechanismCode						,'|'
+			-- 								,im.Term									,'|'
+			-- 								,ec.InjuryPlaceDate							,'|'
+			-- 								,ec.InjuryPlaceTime							,'|'
+			-- 								,ec.InjuryPlaceCode							,'|'
+			-- 								,ipc.Term									,'|'
+			-- 								,ec.InjuryActivityStatus					,'|'
+			-- 								,ias.Term									,'|'
+			-- 								,ec.InjuryActivityType						,'|'
+			-- 								,iat.Term									,'|'
+			-- 								,ec.AlcoholDrugInvolvementsCode				,'|'
+			-- 								,ec.AlcoholDrugInvolvementsCode1			,'|'
+			-- 								,ad1.Term									,'|'
+			-- 								,ec.AlcoholDrugInvolvementsCode2			,'|'
+			-- 								,ad2.Term									,'|'
+			-- 								,ec.AlcoholDrugInvolvementsCode3			,'|'
+			-- 								,ad3.Term									,'|'
+			-- 								,ec.Tariff									,'|'
+			-- 								,CONCAT(ec.FinalPrice
+			-- 								,ec.ClinicalCodedScoredAssessmentToolTypeCode		,'|'
+			-- 								,att.Term											,'|'
+			-- 								,ec.ClinicalCodedScoredAssessmentToolTypeCode1		,'|'
+			-- 								,att1.Term											,'|'
+			-- 								,ec.ClinicalCodedScoredAssessmentToolTypeCode2		,'|'
+			-- 								,att2.Term											,'|'
+			-- 								,ec.ClinicalCodedScoredAssessmentToolTypeCode3		,'|'
+			-- 								,att3.Term											,'|'
+			-- 								,ec.ClinicalCodedScoredAssessmentPersonScore		,'|'
+			-- 								,aps.Term											,'|'
+			-- 								,ec.ClinicalCodedScoredAssessmentPersonScore1		,'|'
+			-- 								,aps1.Term											,'|'
+			-- 								,ec.ClinicalCodedScoredAssessmentPersonScore2		,'|'
+			-- 								,aps2.Term											,'|'
+			-- 								,ec.ClinicalCodedScoredAssessmentPersonScore3		,'|'
+			-- 								,aps3.Term											,'|'
+			-- 								,ec.ValidationTimestamp								,'|'
+			-- 								,ec.ValidationTimestamp1							,'|'
+			-- 								,ec.ValidationTimestamp2							,'|'
+			-- 								,ec.ValidationTimestamp3							,'|'
+			-- 								,ec.ClinicalCodedFindingsCode						,'|'
+			-- 								,cfc.Term											,'|'
+			-- 								,ec.ClinicalCodedFindingsCode1						,'|'
+			-- 								,cfc1.Term											,'|'
+			-- 								,ec.ClinicalCodedFindingsCode2						,'|'
+			-- 								,cfc2.Term											,'|'
+			-- 								,ec.ClinicalCodedFindingsCode3						,'|'
+			-- 								,cfc3.Term											,'|'
+			-- 								,ec.ClinicalCodedFindingsCodeTimestamp				,'|'
+			-- 								,ec.ClinicalCodedFindingsCodeTimestamp1				,'|'
+			-- 								,ec.ClinicalCodedFindingsCodeTimestamp2				,'|'
+			-- 								,ec.ClinicalCodedFindingsCodeTimestamp3				,'|'											
+			-- 								))) AS RecordVersion
 	FROM #Ecds AS ec
-		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[AeDepartment] AS d
+		LEFT OUTER JOIN [ODS].[dbo].[AeDepartment] AS d
 			ON ec.DepartmentTypeCode  = d.AeDepartmentId
-		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[ProviderOrganisation] AS o
+		LEFT OUTER JOIN [ODS].[dbo].[ProviderOrganisation] AS o
 			ON ec.ProviderCode = o.ProviderOrganisationId
-		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[PrimaryCareOrganisation] AS po
+		LEFT OUTER JOIN [ODS].[dbo].[PrimaryCareOrganisation] AS po
 			ON ec.ResidenceCcg = po.PrimaryCareOrganisationId
-		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[ProviderOrganisation] AS o2
+		LEFT OUTER JOIN [ODS].[dbo].[ProviderOrganisation] AS o2
 			ON ec.ConveyingAmbulanceTrust = o2.ProviderOrganisationId
-		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[EthnicCategory] AS eth
+		LEFT OUTER JOIN [ODS].[dbo].[EthnicCategory] AS eth
 			ON ec.EthnicCategory = eth.EthnicCategoryId
 		LEFT OUTER JOIN #Snomed AS am
 			ON ec.ArrivalMode = am.ConceptId
@@ -516,7 +482,7 @@ SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 			ON ec.TreatmentCode2 = t2.ConceptId
 		LEFT OUTER JOIN #Snomed AS t3
 			ON ec.TreatmentCode3 = t3.ConceptId
-		LEFT OUTER JOIN [$(OdsDbName)].dbo.AeAttendanceCategory AS ac
+		LEFT OUTER JOIN [ODS].dbo.AeAttendanceCategory AS ac
 			ON ec.AttendanceCategory = ac.AeAttendanceCategoryId
 		LEFT OUTER JOIN #Snomed AS rs
 			ON ec.ReferredToService = CAST(rs.ConceptId AS VARCHAR(50))
@@ -582,21 +548,21 @@ SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 			ON ec.AttendanceSource = ats.ConceptId
 		LEFT OUTER JOIN #Snomed AS acoms
 			ON ec.AccommodationStatus = acoms.ConceptId
-		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[AeInvestigation] AS iv
+		LEFT OUTER JOIN [ODS].[dbo].[AeInvestigation] AS iv
 			ON ec.EquivalentAeInvestigationCode = iv.AeInvestigationId
-		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[AeInvestigation] AS iv1
+		LEFT OUTER JOIN [ODS].[dbo].[AeInvestigation] AS iv1
 			ON ec.EquivalentAeInvestigationCode1 = iv1.AeInvestigationId
-		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[AeInvestigation] AS iv2
+		LEFT OUTER JOIN [ODS].[dbo].[AeInvestigation] AS iv2
 			ON ec.EquivalentAeInvestigationCode2 = iv2.AeInvestigationId
-		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[AeTreatment] AS tr
+		LEFT OUTER JOIN [ODS].[dbo].[AeTreatment] AS tr
 			ON ec.EquivalentAeTreatmentCode = tr.AeTreatmentId
-		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[AeTreatment] AS tr1
+		LEFT OUTER JOIN [ODS].[dbo].[AeTreatment] AS tr1
 			ON ec.EquivalentAeTreatmentCode1 = tr1.AeTreatmentId
-		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[AeTreatment] AS tr2
+		LEFT OUTER JOIN [ODS].[dbo].[AeTreatment] AS tr2
 			ON ec.EquivalentAeTreatmentCode2 = tr2.AeTreatmentId
-		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[AeTreatment] AS tr3
+		LEFT OUTER JOIN [ODS].[dbo].[AeTreatment] AS tr3
 			ON ec.EquivalentAeTreatmentCode3 = tr3.AeTreatmentId
-		LEFT OUTER JOIN [$(OdsDbName)].ref.OnsLaWardMapping AS olwm
+		LEFT OUTER JOIN [ODS].ref.OnsLaWardMapping AS olwm
 			ON ec.LowerSuperOutputAreaCode = olwm.LowerSuperOutputAreaCode
 	-- Removing rows where CDS_Unique_Identifier is NULL as they cannot be matched on
 	WHERE ec.EmergencyCareId IS NOT NULL
@@ -933,169 +899,169 @@ SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 			,@InsertUpdateTime
 			,SOURCE.RecordVersion)
     -- Handle updates using RecordVersion
-	WHEN MATCHED
-    AND SOURCE.RecordVersion <> TARGET.RecordVersion THEN
-    UPDATE SET TARGET.SourceSystemKey									 	= SOURCE.SourceSystemKey
-			,TARGET.[Provider]											 	= SOURCE.[Provider]
-			,TARGET.DepartmentTypeCode									 	= SOURCE.DepartmentTypeCode
-			,TARGET.DepartmentType										 	= SOURCE.DepartmentType
-			,TARGET.OrganisationCodeCommissioner						 	= SOURCE.OrganisationCodeCommissioner
-			,TARGET.PersonId											 	= SOURCE.PersonId
-			,TARGET.Age													 	= SOURCE.Age
-			,TARGET.Gender												 	= SOURCE.Gender
-			,TARGET.LocalPatientIdentifier								 	= SOURCE.LocalPatientIdentifier
-			,TARGET.GeneralPractice										 	= SOURCE.GeneralPractice
-			,TARGET.[Site]												 	= SOURCE.[Site]
-			,TARGET.OutputArea											 	= SOURCE.OutputArea
-			,TARGET.LowerSuperOutputAreaCode							 	= SOURCE.LowerSuperOutputAreaCode
-			,TARGET.LocalAuthorityCode									 	= SOURCE.LocalAuthorityCode
-			,TARGET.LocalAuthorityName									 	= SOURCE.LocalAuthorityName
-			,TARGET.PostcodeDistrict									 	= SOURCE.PostcodeDistrict
-			,TARGET.ResidenceCcg										 	= SOURCE.ResidenceCcg
-			,TARGET.ResidenceCcgDescription								 	= SOURCE.ResidenceCcgDescription
-			,TARGET.EthnicCategory										 	= SOURCE.EthnicCategory
-			,TARGET.EthnicCategoryDescription							 	= SOURCE.EthnicCategoryDescription
-			,TARGET.AccommodationStatus									 	= SOURCE.AccommodationStatus
-			,TARGET.AccommodationStatusDescription						 	= SOURCE.AccommodationStatusDescription
-			,TARGET.ArrivalDate											 	= SOURCE.ArrivalDate
-			,TARGET.ArrivalTime											 	= SOURCE.ArrivalTime
-			,TARGET.ArrivalMode											 	= SOURCE.ArrivalMode
-			,TARGET.ArrivalModeDescription								 	= SOURCE.ArrivalModeDescription
-			,TARGET.ArrivalPlanned										 	= SOURCE.ArrivalPlanned
-			,TARGET.ReferredToServiceDate								 	= SOURCE.ReferredToServiceDate
-			,TARGET.ReferredToServiceTime								 	= SOURCE.ReferredToServiceTime
-			,TARGET.InitialAssessmentDate								 	= SOURCE.InitialAssessmentDate
-			,TARGET.InitialAssessmentTime								 	= SOURCE.InitialAssessmentTime
-			,TARGET.SeenForTreatmentDate								 	= SOURCE.SeenForTreatmentDate
-			,TARGET.SeenForTreatmentTime								 	= SOURCE.SeenForTreatmentTime
-			,TARGET.ConclusionDate										 	= SOURCE.ConclusionDate
-			,TARGET.ConclusionTime										 	= SOURCE.ConclusionTime
-			,TARGET.DepartureDate										 	= SOURCE.DepartureDate
-			,TARGET.DepartureTime										 	= SOURCE.DepartureTime
-			,TARGET.DecisionToAdmitDate									 	= SOURCE.DecisionToAdmitDate
-			,TARGET.DecisionToAdmitTime									 	= SOURCE.DecisionToAdmitTime
-			,TARGET.DecisionToAdmitTimeSinceArrival						 	= SOURCE.DecisionToAdmitTimeSinceArrival
-			,TARGET.DiagnosesCode										 	= SOURCE.DiagnosesCode
-			,TARGET.DiagnosesDescription								 	= SOURCE.DiagnosesDescription
-			,TARGET.DiagnosesCode1										 	= SOURCE.DiagnosesCode1
-			,TARGET.DiagnosesDescription1								 	= SOURCE.DiagnosesDescription1
-			,TARGET.DiagnosesCode2										 	= SOURCE.DiagnosesCode2
-			,TARGET.DiagnosesDescription2								 	= SOURCE.DiagnosesDescription2
-			,TARGET.DiagnosesCode3										 	= SOURCE.DiagnosesCode3
-			,TARGET.DiagnosesDescription3								 	= SOURCE.DiagnosesDescription3
-			,TARGET.InvestigationCode									 	= SOURCE.InvestigationCode
-			,TARGET.InvestigationDescription							 	= SOURCE.InvestigationDescription
-			,TARGET.InvestigationCode1									 	= SOURCE.InvestigationCode1
-			,TARGET.InvestigationDescription1							 	= SOURCE.InvestigationDescription1
-			,TARGET.InvestigationCode2									 	= SOURCE.InvestigationCode2
-			,TARGET.InvestigationDescription2							 	= SOURCE.InvestigationDescription2
-			,TARGET.TreatmentCode										 	= SOURCE.TreatmentCode
-			,TARGET.TreatmentDescription								 	= SOURCE.TreatmentDescription
-			,TARGET.TreatmentCode1										 	= SOURCE.TreatmentCode1
-			,TARGET.TreatmentDescription1								 	= SOURCE.TreatmentDescription1
-			,TARGET.TreatmentCode2										 	= SOURCE.TreatmentCode2
-			,TARGET.TreatmentDescription2								 	= SOURCE.TreatmentDescription2
-			,TARGET.TreatmentCode3										 	= SOURCE.TreatmentCode3
-			,TARGET.TreatmentDescription3								 	= SOURCE.TreatmentDescription3
-			,TARGET.HealthResourceGroup									 	= SOURCE.HealthResourceGroup
-			,TARGET.AttendanceCategory									 	= SOURCE.AttendanceCategory
-			,TARGET.AttendanceCategoryDescription						 	= SOURCE.AttendanceCategoryDescription
-			,TARGET.AmbulanceIncidentNumber								 	= SOURCE.AmbulanceIncidentNumber
-			,TARGET.ConveyingAmbulanceTrust								 	= SOURCE.ConveyingAmbulanceTrust
-			,TARGET.ConveyingAmbulanceTrustDescription					 	= SOURCE.ConveyingAmbulanceTrustDescription
-			,TARGET.AttendanceSource									 	= SOURCE.AttendanceSource
-			,TARGET.AttendanceSourceDescription							 	= SOURCE.AttendanceSourceDescription
-			,TARGET.ReferredToService									 	= SOURCE.ReferredToService
-			,TARGET.ReferredToServiceDescription						 	= SOURCE.ReferredToServiceDescription
-			,TARGET.ReferredToService1									 	= SOURCE.ReferredToService1
-			,TARGET.ReferredToService1Description						 	= SOURCE.ReferredToService1Description
-			,TARGET.DischargeStatus										 	= SOURCE.DischargeStatus
-			,TARGET.DischargeStatusDescription							 	= SOURCE.DischargeStatusDescription
-			,TARGET.DischargeDestination								 	= SOURCE.DischargeDestination
-			,TARGET.DischargeDestinationDescription						 	= SOURCE.DischargeDestinationDescription
-			,TARGET.ChiefComplaint										 	= SOURCE.ChiefComplaint
-			,TARGET.ChiefComplaintDescription							 	= SOURCE.ChiefComplaintDescription
-			,TARGET.Acuity												 	= SOURCE.Acuity
-			,TARGET.AcuityDescription									 	= SOURCE.AcuityDescription
-			,TARGET.ComorbiditiesCode									 	= SOURCE.ComorbiditiesCode
-			,TARGET.ComorbiditiesCodeDescription						 	= SOURCE.ComorbiditiesCodeDescription
-			,TARGET.ComorbiditiesCode1									 	= SOURCE.ComorbiditiesCode1
-			,TARGET.ComorbiditiesCode1Description						 	= SOURCE.ComorbiditiesCode1Description
-			,TARGET.ComorbiditiesCode2									 	= SOURCE.ComorbiditiesCode2
-			,TARGET.ComorbiditiesCode2Description						 	= SOURCE.ComorbiditiesCode2Description
-			,TARGET.AecRelated											 	= SOURCE.AecRelated
-			,TARGET.EquivalentAeInvestigationCode						 	= SOURCE.EquivalentAeInvestigationCode
-			,TARGET.EquivalentAeInvestigationCodeDescription			 	= SOURCE.EquivalentAeInvestigationCodeDescription
-			,TARGET.EquivalentAeInvestigationCode1						 	= SOURCE.EquivalentAeInvestigationCode1
-			,TARGET.EquivalentAeInvestigationCode1Description			 	= SOURCE.EquivalentAeInvestigationCode1Description
-			,TARGET.EquivalentAeInvestigationCode2						 	= SOURCE.EquivalentAeInvestigationCode2
-			,TARGET.EquivalentAeInvestigationCode2Description			 	= SOURCE.EquivalentAeInvestigationCode2Description
-			,TARGET.EquivalentAeTreatmentCode							 	= SOURCE.EquivalentAeTreatmentCode
-			,TARGET.EquivalentAeTreatmentCodeDescription				 	= SOURCE.EquivalentAeTreatmentCodeDescription
-			,TARGET.EquivalentAeTreatmentCode1							 	= SOURCE.EquivalentAeTreatmentCode1
-			,TARGET.EquivalentAeTreatmentCode1Description				 	= SOURCE.EquivalentAeTreatmentCode1Description
-			,TARGET.EquivalentAeTreatmentCode2							 	= SOURCE.EquivalentAeTreatmentCode2
-			,TARGET.EquivalentAeTreatmentCode2Description				 	= SOURCE.EquivalentAeTreatmentCode2Description
-			,TARGET.EquivalentAeTreatmentCode3							 	= SOURCE.EquivalentAeTreatmentCode3
-			,TARGET.EquivalentAeTreatmentCode3Description				 	= SOURCE.EquivalentAeTreatmentCode3Description
-			,TARGET.InjuryIntentCode									 	= SOURCE.InjuryIntentCode
-			,TARGET.InjuryIntentDescription								 	= SOURCE.InjuryIntentDescription
-			,TARGET.InjuryMechanismCode									 	= SOURCE.InjuryMechanismCode
-			,TARGET.InjuryMechanismDescription							 	= SOURCE.InjuryMechanismDescription
-			,TARGET.InjuryPlaceDate										 	= SOURCE.InjuryPlaceDate
-			,TARGET.InjuryPlaceTime										 	= SOURCE.InjuryPlaceTime
-			,TARGET.InjuryPlaceCode										 	= SOURCE.InjuryPlaceCode
-			,TARGET.InjuryPlaceDescription								 	= SOURCE.InjuryPlaceDescription
-			,TARGET.InjuryActivityStatus								 	= SOURCE.InjuryActivityStatus
-			,TARGET.InjuryActivityStatusDescription						 	= SOURCE.InjuryActivityStatusDescription
-			,TARGET.InjuryActivityType									 	= SOURCE.InjuryActivityType
-			,TARGET.InjuryActivityTypeDescription						 	= SOURCE.InjuryActivityTypeDescription
-			,TARGET.AlcoholDrugInvolvementsCode							 	= SOURCE.AlcoholDrugInvolvementsCode
-			,TARGET.AlcoholDrugInvolvementsCode1						 	= SOURCE.AlcoholDrugInvolvementsCode1
-			,TARGET.AlcoholDrugInvolvements1Description					 	= SOURCE.AlcoholDrugInvolvements1Description
-			,TARGET.AlcoholDrugInvolvementsCode2						 	= SOURCE.AlcoholDrugInvolvementsCode2
-			,TARGET.AlcoholDrugInvolvements2Description					 	= SOURCE.AlcoholDrugInvolvements2Description
-			,TARGET.AlcoholDrugInvolvementsCode3						 	= SOURCE.AlcoholDrugInvolvementsCode3
-			,TARGET.AlcoholDrugInvolvements3Description					 	= SOURCE.AlcoholDrugInvolvements3Description
-			,TARGET.Tariff												 	= SOURCE.Tariff
-			,TARGET.FinalPrice											 	= SOURCE.FinalPrice
-			,TARGET.ClinicalCodedScoredAssessmentToolTypeCode			 	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode
-			,TARGET.ClinicalCodedScoredAssessmentToolTypeCodeDescription 	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCodeDescription
-			,TARGET.ClinicalCodedScoredAssessmentToolTypeCode1			 	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode1
-			,TARGET.ClinicalCodedScoredAssessmentToolTypeCode1Description	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode1Description
-			,TARGET.ClinicalCodedScoredAssessmentToolTypeCode2			 	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode2
-			,TARGET.ClinicalCodedScoredAssessmentToolTypeCode2Description	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode2Description
-			,TARGET.ClinicalCodedScoredAssessmentToolTypeCode3			 	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode3
-			,TARGET.ClinicalCodedScoredAssessmentToolTypeCode3Description	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode3Description
-			,TARGET.ClinicalCodedScoredAssessmentPersonScore			 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore
-			,TARGET.ClinicalCodedScoredAssessmentPersonScoreDescription	 	= SOURCE.ClinicalCodedScoredAssessmentPersonScoreDescription
-			,TARGET.ClinicalCodedScoredAssessmentPersonScore1			 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore1
-			,TARGET.ClinicalCodedScoredAssessmentPersonScore1Description 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore1Description
-			,TARGET.ClinicalCodedScoredAssessmentPersonScore2			 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore2
-			,TARGET.ClinicalCodedScoredAssessmentPersonScore2Description 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore2Description
-			,TARGET.ClinicalCodedScoredAssessmentPersonScore3			 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore3
-			,TARGET.ClinicalCodedScoredAssessmentPersonScore3Description 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore3Description
-			,TARGET.ValidationTimestamp									 	= SOURCE.ValidationTimestamp
-			,TARGET.ValidationTimestamp1								 	= SOURCE.ValidationTimestamp1
-			,TARGET.ValidationTimestamp2								 	= SOURCE.ValidationTimestamp2
-			,TARGET.ValidationTimestamp3								 	= SOURCE.ValidationTimestamp3
-			,TARGET.ClinicalCodedFindingsCode							 	= SOURCE.ClinicalCodedFindingsCode
-			,TARGET.ClinicalCodedFindingsCodeDescription				 	= SOURCE.ClinicalCodedFindingsCodeDescription
-			,TARGET.ClinicalCodedFindingsCode1							 	= SOURCE.ClinicalCodedFindingsCode1
-			,TARGET.ClinicalCodedFindingsCode1Description				 	= SOURCE.ClinicalCodedFindingsCode1Description
-			,TARGET.ClinicalCodedFindingsCode2							 	= SOURCE.ClinicalCodedFindingsCode2
-			,TARGET.ClinicalCodedFindingsCode2Description				 	= SOURCE.ClinicalCodedFindingsCode2Description
-			,TARGET.ClinicalCodedFindingsCode3							 	= SOURCE.ClinicalCodedFindingsCode3
-			,TARGET.ClinicalCodedFindingsCode3Description				 	= SOURCE.ClinicalCodedFindingsCode3Description
-			,TARGET.ClinicalCodedFindingsCodeTimestamp					 	= SOURCE.ClinicalCodedFindingsCodeTimestamp
-			,TARGET.ClinicalCodedFindingsCodeTimestamp1					 	= SOURCE.ClinicalCodedFindingsCodeTimestamp1
-			,TARGET.ClinicalCodedFindingsCodeTimestamp2					 	= SOURCE.ClinicalCodedFindingsCodeTimestamp2
-			,TARGET.ClinicalCodedFindingsCodeTimestamp3					 	= SOURCE.ClinicalCodedFindingsCodeTimestamp3
-			,TARGET.IsActive											 	= 1
-			,TARGET.UpdateUser											 	= @InsertUpdateUser
-			,TARGET.UpdateTime											 	= @InsertUpdateTime
-			,TARGET.RecordVersion										 	= SOURCE.RecordVersion
-	-- Set deleted rows from source to inactive. Data older than 24 months will not be resent, so do not set not inactive
+	-- WHEN MATCHED
+    -- AND SOURCE.RecordVersion <> TARGET.RecordVersion THEN
+    -- UPDATE SET TARGET.SourceSystemKey									 	= SOURCE.SourceSystemKey
+	-- 		,TARGET.[Provider]											 	= SOURCE.[Provider]
+	-- 		,TARGET.DepartmentTypeCode									 	= SOURCE.DepartmentTypeCode
+	-- 		,TARGET.DepartmentType										 	= SOURCE.DepartmentType
+	-- 		,TARGET.OrganisationCodeCommissioner						 	= SOURCE.OrganisationCodeCommissioner
+	-- 		,TARGET.PersonId											 	= SOURCE.PersonId
+	-- 		,TARGET.Age													 	= SOURCE.Age
+	-- 		,TARGET.Gender												 	= SOURCE.Gender
+	-- 		,TARGET.LocalPatientIdentifier								 	= SOURCE.LocalPatientIdentifier
+	-- 		,TARGET.GeneralPractice										 	= SOURCE.GeneralPractice
+	-- 		,TARGET.[Site]												 	= SOURCE.[Site]
+	-- 		,TARGET.OutputArea											 	= SOURCE.OutputArea
+	-- 		,TARGET.LowerSuperOutputAreaCode							 	= SOURCE.LowerSuperOutputAreaCode
+	-- 		,TARGET.LocalAuthorityCode									 	= SOURCE.LocalAuthorityCode
+	-- 		,TARGET.LocalAuthorityName									 	= SOURCE.LocalAuthorityName
+	-- 		,TARGET.PostcodeDistrict									 	= SOURCE.PostcodeDistrict
+	-- 		,TARGET.ResidenceCcg										 	= SOURCE.ResidenceCcg
+	-- 		,TARGET.ResidenceCcgDescription								 	= SOURCE.ResidenceCcgDescription
+	-- 		,TARGET.EthnicCategory										 	= SOURCE.EthnicCategory
+	-- 		,TARGET.EthnicCategoryDescription							 	= SOURCE.EthnicCategoryDescription
+	-- 		,TARGET.AccommodationStatus									 	= SOURCE.AccommodationStatus
+	-- 		,TARGET.AccommodationStatusDescription						 	= SOURCE.AccommodationStatusDescription
+	-- 		,TARGET.ArrivalDate											 	= SOURCE.ArrivalDate
+	-- 		,TARGET.ArrivalTime											 	= SOURCE.ArrivalTime
+	-- 		,TARGET.ArrivalMode											 	= SOURCE.ArrivalMode
+	-- 		,TARGET.ArrivalModeDescription								 	= SOURCE.ArrivalModeDescription
+	-- 		,TARGET.ArrivalPlanned										 	= SOURCE.ArrivalPlanned
+	-- 		,TARGET.ReferredToServiceDate								 	= SOURCE.ReferredToServiceDate
+	-- 		,TARGET.ReferredToServiceTime								 	= SOURCE.ReferredToServiceTime
+	-- 		,TARGET.InitialAssessmentDate								 	= SOURCE.InitialAssessmentDate
+	-- 		,TARGET.InitialAssessmentTime								 	= SOURCE.InitialAssessmentTime
+	-- 		,TARGET.SeenForTreatmentDate								 	= SOURCE.SeenForTreatmentDate
+	-- 		,TARGET.SeenForTreatmentTime								 	= SOURCE.SeenForTreatmentTime
+	-- 		,TARGET.ConclusionDate										 	= SOURCE.ConclusionDate
+	-- 		,TARGET.ConclusionTime										 	= SOURCE.ConclusionTime
+	-- 		,TARGET.DepartureDate										 	= SOURCE.DepartureDate
+	-- 		,TARGET.DepartureTime										 	= SOURCE.DepartureTime
+	-- 		,TARGET.DecisionToAdmitDate									 	= SOURCE.DecisionToAdmitDate
+	-- 		,TARGET.DecisionToAdmitTime									 	= SOURCE.DecisionToAdmitTime
+	-- 		,TARGET.DecisionToAdmitTimeSinceArrival						 	= SOURCE.DecisionToAdmitTimeSinceArrival
+	-- 		,TARGET.DiagnosesCode										 	= SOURCE.DiagnosesCode
+	-- 		,TARGET.DiagnosesDescription								 	= SOURCE.DiagnosesDescription
+	-- 		,TARGET.DiagnosesCode1										 	= SOURCE.DiagnosesCode1
+	-- 		,TARGET.DiagnosesDescription1								 	= SOURCE.DiagnosesDescription1
+	-- 		,TARGET.DiagnosesCode2										 	= SOURCE.DiagnosesCode2
+	-- 		,TARGET.DiagnosesDescription2								 	= SOURCE.DiagnosesDescription2
+	-- 		,TARGET.DiagnosesCode3										 	= SOURCE.DiagnosesCode3
+	-- 		,TARGET.DiagnosesDescription3								 	= SOURCE.DiagnosesDescription3
+	-- 		,TARGET.InvestigationCode									 	= SOURCE.InvestigationCode
+	-- 		,TARGET.InvestigationDescription							 	= SOURCE.InvestigationDescription
+	-- 		,TARGET.InvestigationCode1									 	= SOURCE.InvestigationCode1
+	-- 		,TARGET.InvestigationDescription1							 	= SOURCE.InvestigationDescription1
+	-- 		,TARGET.InvestigationCode2									 	= SOURCE.InvestigationCode2
+	-- 		,TARGET.InvestigationDescription2							 	= SOURCE.InvestigationDescription2
+	-- 		,TARGET.TreatmentCode										 	= SOURCE.TreatmentCode
+	-- 		,TARGET.TreatmentDescription								 	= SOURCE.TreatmentDescription
+	-- 		,TARGET.TreatmentCode1										 	= SOURCE.TreatmentCode1
+	-- 		,TARGET.TreatmentDescription1								 	= SOURCE.TreatmentDescription1
+	-- 		,TARGET.TreatmentCode2										 	= SOURCE.TreatmentCode2
+	-- 		,TARGET.TreatmentDescription2								 	= SOURCE.TreatmentDescription2
+	-- 		,TARGET.TreatmentCode3										 	= SOURCE.TreatmentCode3
+	-- 		,TARGET.TreatmentDescription3								 	= SOURCE.TreatmentDescription3
+	-- 		,TARGET.HealthResourceGroup									 	= SOURCE.HealthResourceGroup
+	-- 		,TARGET.AttendanceCategory									 	= SOURCE.AttendanceCategory
+	-- 		,TARGET.AttendanceCategoryDescription						 	= SOURCE.AttendanceCategoryDescription
+	-- 		,TARGET.AmbulanceIncidentNumber								 	= SOURCE.AmbulanceIncidentNumber
+	-- 		,TARGET.ConveyingAmbulanceTrust								 	= SOURCE.ConveyingAmbulanceTrust
+	-- 		,TARGET.ConveyingAmbulanceTrustDescription					 	= SOURCE.ConveyingAmbulanceTrustDescription
+	-- 		,TARGET.AttendanceSource									 	= SOURCE.AttendanceSource
+	-- 		,TARGET.AttendanceSourceDescription							 	= SOURCE.AttendanceSourceDescription
+	-- 		,TARGET.ReferredToService									 	= SOURCE.ReferredToService
+	-- 		,TARGET.ReferredToServiceDescription						 	= SOURCE.ReferredToServiceDescription
+	-- 		,TARGET.ReferredToService1									 	= SOURCE.ReferredToService1
+	-- 		,TARGET.ReferredToService1Description						 	= SOURCE.ReferredToService1Description
+	-- 		,TARGET.DischargeStatus										 	= SOURCE.DischargeStatus
+	-- 		,TARGET.DischargeStatusDescription							 	= SOURCE.DischargeStatusDescription
+	-- 		,TARGET.DischargeDestination								 	= SOURCE.DischargeDestination
+	-- 		,TARGET.DischargeDestinationDescription						 	= SOURCE.DischargeDestinationDescription
+	-- 		,TARGET.ChiefComplaint										 	= SOURCE.ChiefComplaint
+	-- 		,TARGET.ChiefComplaintDescription							 	= SOURCE.ChiefComplaintDescription
+	-- 		,TARGET.Acuity												 	= SOURCE.Acuity
+	-- 		,TARGET.AcuityDescription									 	= SOURCE.AcuityDescription
+	-- 		,TARGET.ComorbiditiesCode									 	= SOURCE.ComorbiditiesCode
+	-- 		,TARGET.ComorbiditiesCodeDescription						 	= SOURCE.ComorbiditiesCodeDescription
+	-- 		,TARGET.ComorbiditiesCode1									 	= SOURCE.ComorbiditiesCode1
+	-- 		,TARGET.ComorbiditiesCode1Description						 	= SOURCE.ComorbiditiesCode1Description
+	-- 		,TARGET.ComorbiditiesCode2									 	= SOURCE.ComorbiditiesCode2
+	-- 		,TARGET.ComorbiditiesCode2Description						 	= SOURCE.ComorbiditiesCode2Description
+	-- 		,TARGET.AecRelated											 	= SOURCE.AecRelated
+	-- 		,TARGET.EquivalentAeInvestigationCode						 	= SOURCE.EquivalentAeInvestigationCode
+	-- 		,TARGET.EquivalentAeInvestigationCodeDescription			 	= SOURCE.EquivalentAeInvestigationCodeDescription
+	-- 		,TARGET.EquivalentAeInvestigationCode1						 	= SOURCE.EquivalentAeInvestigationCode1
+	-- 		,TARGET.EquivalentAeInvestigationCode1Description			 	= SOURCE.EquivalentAeInvestigationCode1Description
+	-- 		,TARGET.EquivalentAeInvestigationCode2						 	= SOURCE.EquivalentAeInvestigationCode2
+	-- 		,TARGET.EquivalentAeInvestigationCode2Description			 	= SOURCE.EquivalentAeInvestigationCode2Description
+	-- 		,TARGET.EquivalentAeTreatmentCode							 	= SOURCE.EquivalentAeTreatmentCode
+	-- 		,TARGET.EquivalentAeTreatmentCodeDescription				 	= SOURCE.EquivalentAeTreatmentCodeDescription
+	-- 		,TARGET.EquivalentAeTreatmentCode1							 	= SOURCE.EquivalentAeTreatmentCode1
+	-- 		,TARGET.EquivalentAeTreatmentCode1Description				 	= SOURCE.EquivalentAeTreatmentCode1Description
+	-- 		,TARGET.EquivalentAeTreatmentCode2							 	= SOURCE.EquivalentAeTreatmentCode2
+	-- 		,TARGET.EquivalentAeTreatmentCode2Description				 	= SOURCE.EquivalentAeTreatmentCode2Description
+	-- 		,TARGET.EquivalentAeTreatmentCode3							 	= SOURCE.EquivalentAeTreatmentCode3
+	-- 		,TARGET.EquivalentAeTreatmentCode3Description				 	= SOURCE.EquivalentAeTreatmentCode3Description
+	-- 		,TARGET.InjuryIntentCode									 	= SOURCE.InjuryIntentCode
+	-- 		,TARGET.InjuryIntentDescription								 	= SOURCE.InjuryIntentDescription
+	-- 		,TARGET.InjuryMechanismCode									 	= SOURCE.InjuryMechanismCode
+	-- 		,TARGET.InjuryMechanismDescription							 	= SOURCE.InjuryMechanismDescription
+	-- 		,TARGET.InjuryPlaceDate										 	= SOURCE.InjuryPlaceDate
+	-- 		,TARGET.InjuryPlaceTime										 	= SOURCE.InjuryPlaceTime
+	-- 		,TARGET.InjuryPlaceCode										 	= SOURCE.InjuryPlaceCode
+	-- 		,TARGET.InjuryPlaceDescription								 	= SOURCE.InjuryPlaceDescription
+	-- 		,TARGET.InjuryActivityStatus								 	= SOURCE.InjuryActivityStatus
+	-- 		,TARGET.InjuryActivityStatusDescription						 	= SOURCE.InjuryActivityStatusDescription
+	-- 		,TARGET.InjuryActivityType									 	= SOURCE.InjuryActivityType
+	-- 		,TARGET.InjuryActivityTypeDescription						 	= SOURCE.InjuryActivityTypeDescription
+	-- 		,TARGET.AlcoholDrugInvolvementsCode							 	= SOURCE.AlcoholDrugInvolvementsCode
+	-- 		,TARGET.AlcoholDrugInvolvementsCode1						 	= SOURCE.AlcoholDrugInvolvementsCode1
+	-- 		,TARGET.AlcoholDrugInvolvements1Description					 	= SOURCE.AlcoholDrugInvolvements1Description
+	-- 		,TARGET.AlcoholDrugInvolvementsCode2						 	= SOURCE.AlcoholDrugInvolvementsCode2
+	-- 		,TARGET.AlcoholDrugInvolvements2Description					 	= SOURCE.AlcoholDrugInvolvements2Description
+	-- 		,TARGET.AlcoholDrugInvolvementsCode3						 	= SOURCE.AlcoholDrugInvolvementsCode3
+	-- 		,TARGET.AlcoholDrugInvolvements3Description					 	= SOURCE.AlcoholDrugInvolvements3Description
+	-- 		,TARGET.Tariff												 	= SOURCE.Tariff
+	-- 		,TARGET.FinalPrice											 	= SOURCE.FinalPrice
+	-- 		,TARGET.ClinicalCodedScoredAssessmentToolTypeCode			 	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode
+	-- 		,TARGET.ClinicalCodedScoredAssessmentToolTypeCodeDescription 	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCodeDescription
+	-- 		,TARGET.ClinicalCodedScoredAssessmentToolTypeCode1			 	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode1
+	-- 		,TARGET.ClinicalCodedScoredAssessmentToolTypeCode1Description	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode1Description
+	-- 		,TARGET.ClinicalCodedScoredAssessmentToolTypeCode2			 	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode2
+	-- 		,TARGET.ClinicalCodedScoredAssessmentToolTypeCode2Description	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode2Description
+	-- 		,TARGET.ClinicalCodedScoredAssessmentToolTypeCode3			 	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode3
+	-- 		,TARGET.ClinicalCodedScoredAssessmentToolTypeCode3Description	= SOURCE.ClinicalCodedScoredAssessmentToolTypeCode3Description
+	-- 		,TARGET.ClinicalCodedScoredAssessmentPersonScore			 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore
+	-- 		,TARGET.ClinicalCodedScoredAssessmentPersonScoreDescription	 	= SOURCE.ClinicalCodedScoredAssessmentPersonScoreDescription
+	-- 		,TARGET.ClinicalCodedScoredAssessmentPersonScore1			 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore1
+	-- 		,TARGET.ClinicalCodedScoredAssessmentPersonScore1Description 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore1Description
+	-- 		,TARGET.ClinicalCodedScoredAssessmentPersonScore2			 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore2
+	-- 		,TARGET.ClinicalCodedScoredAssessmentPersonScore2Description 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore2Description
+	-- 		,TARGET.ClinicalCodedScoredAssessmentPersonScore3			 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore3
+	-- 		,TARGET.ClinicalCodedScoredAssessmentPersonScore3Description 	= SOURCE.ClinicalCodedScoredAssessmentPersonScore3Description
+	-- 		,TARGET.ValidationTimestamp									 	= SOURCE.ValidationTimestamp
+	-- 		,TARGET.ValidationTimestamp1								 	= SOURCE.ValidationTimestamp1
+	-- 		,TARGET.ValidationTimestamp2								 	= SOURCE.ValidationTimestamp2
+	-- 		,TARGET.ValidationTimestamp3								 	= SOURCE.ValidationTimestamp3
+	-- 		,TARGET.ClinicalCodedFindingsCode							 	= SOURCE.ClinicalCodedFindingsCode
+	-- 		,TARGET.ClinicalCodedFindingsCodeDescription				 	= SOURCE.ClinicalCodedFindingsCodeDescription
+	-- 		,TARGET.ClinicalCodedFindingsCode1							 	= SOURCE.ClinicalCodedFindingsCode1
+	-- 		,TARGET.ClinicalCodedFindingsCode1Description				 	= SOURCE.ClinicalCodedFindingsCode1Description
+	-- 		,TARGET.ClinicalCodedFindingsCode2							 	= SOURCE.ClinicalCodedFindingsCode2
+	-- 		,TARGET.ClinicalCodedFindingsCode2Description				 	= SOURCE.ClinicalCodedFindingsCode2Description
+	-- 		,TARGET.ClinicalCodedFindingsCode3							 	= SOURCE.ClinicalCodedFindingsCode3
+	-- 		,TARGET.ClinicalCodedFindingsCode3Description				 	= SOURCE.ClinicalCodedFindingsCode3Description
+	-- 		,TARGET.ClinicalCodedFindingsCodeTimestamp					 	= SOURCE.ClinicalCodedFindingsCodeTimestamp
+	-- 		,TARGET.ClinicalCodedFindingsCodeTimestamp1					 	= SOURCE.ClinicalCodedFindingsCodeTimestamp1
+	-- 		,TARGET.ClinicalCodedFindingsCodeTimestamp2					 	= SOURCE.ClinicalCodedFindingsCodeTimestamp2
+	-- 		,TARGET.ClinicalCodedFindingsCodeTimestamp3					 	= SOURCE.ClinicalCodedFindingsCodeTimestamp3
+	-- 		,TARGET.IsActive											 	= 1
+	-- 		,TARGET.UpdateUser											 	= @InsertUpdateUser
+	-- 		,TARGET.UpdateTime											 	= @InsertUpdateTime
+	-- 		,TARGET.RecordVersion										 	= SOURCE.RecordVersion
+	-- -- Set deleted rows from source to inactive. Data older than 24 months will not be resent, so do not set not inactive
 	WHEN NOT MATCHED BY SOURCE
     AND TARGET.IsActive = 1
 	AND TARGET.DepartureDate > @24MonthsAgo	THEN
@@ -1104,39 +1070,3 @@ SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 			  ,TARGET.IsActive		= 0
               ,TARGET.RecordVersion = 0
 	OUTPUT $ACTION INTO @SummaryOfChanges;
-
-END TRY
-BEGIN CATCH
-	SELECT	 @EndTime = SYSDATETIME()
-			,@ErrorMessage = ERROR_MESSAGE();
-
-    -- Log the inserts, updates, and deletes, as well as any error message captured
-    EXEC [$(LoggingDbName)].dbo.usp_UpdateEtlLog	 @LogId        = @LogId
-													,@EndTime      = @EndTime
-													,@Success      = @Success
-													,@ErrorMessage = @ErrorMessage
-													,@Inserts      = @Inserts
-													,@Updates      = @Updates
-													,@Deletes      = @Deletes;
-
-    -- Throw the error (don't just swallow it)
-    THROW;
-END CATCH
-
-SELECT	 @EndTime = SYSDATETIME()
-		,@Success = 1;
-
--- Count the number of changes of each type from the merge
-SELECT	 @Inserts = ISNULL(SUM(IIF(Change = 'Insert', 1, 0)), 0)
-		,@Updates = ISNULL(SUM(IIF(Change = 'Update', 1, 0)), 0)
-		,@Deletes = ISNULL(SUM(IIF(Change = 'Delete', 1, 0)), 0)
-FROM @SummaryOfChanges;
-
--- Log the inserts, updates, and deletes, as well as any error message captured
-EXEC [$(LoggingDbName)].dbo.usp_UpdateEtlLog	 @LogId        = @LogId
-												,@EndTime      = @EndTime
-												,@Success      = @Success
-												,@ErrorMessage = @ErrorMessage
-												,@Inserts      = @Inserts
-												,@Updates      = @Updates
-												,@Deletes      = @Deletes;

@@ -34,6 +34,7 @@ EXEC [$(LoggingDbName)].dbo.usp_CreateEtlLog @PackageName			= @ProcedureName
 DECLARE @SummaryOfChanges TABLE(Change VARCHAR(20));
 
 BEGIN TRY
+	BEGIN TRANSACTION;
 
 	DROP TABLE IF EXISTS #Snomed;
 
@@ -52,7 +53,7 @@ BEGIN TRY
 
 	DROP TABLE IF EXISTS #Ecds;
 
-SELECT	 CDS_Unique_Identifier AS EmergencyCareId
+	SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 			,@SourceSystemKey AS SourceSystemKey
 			,Organisation_Code_Provider AS ProviderCode
 			,Department_Type AS DepartmentTypeCode
@@ -163,8 +164,10 @@ SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 	INTO #Ecds
 	FROM cxsus.Ecds;
 
-	MERGE INTO [$(OdsDbName)].cxsus.EmergencyCare AS TARGET
-	USING	(SELECT	 ec.EmergencyCareId
+	DROP TABLE IF EXISTS #SOURCE;
+-- Creating temporary table to hold the data from the source
+
+	SELECT	 ec.EmergencyCareId
 			,ec.SourceSystemKey
 			,ec.ProviderCode
 			,o.ProviderShortName AS [Provider]
@@ -481,6 +484,7 @@ SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 											,ec.ClinicalCodedFindingsCodeTimestamp2				,'|'
 											,ec.ClinicalCodedFindingsCodeTimestamp3				,'|'											
 											))) AS RecordVersion
+	INTO #SOURCE
 	FROM #Ecds AS ec
 		LEFT OUTER JOIN [$(OdsDbName)].[dbo].[AeDepartment] AS d
 			ON ec.DepartmentTypeCode  = d.AeDepartmentId
@@ -600,11 +604,11 @@ SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 			ON ec.LowerSuperOutputAreaCode = olwm.LowerSuperOutputAreaCode
 	-- Removing rows where CDS_Unique_Identifier is NULL as they cannot be matched on
 	WHERE ec.EmergencyCareId IS NOT NULL
-	AND ec.RowNum = 1) AS SOURCE
-		ON TARGET.EmergencyCareId = SOURCE.EmergencyCareId
-		AND TARGET.ProviderCode = SOURCE.ProviderCode
-	WHEN NOT MATCHED BY TARGET THEN
-	INSERT ( EmergencyCareId
+	AND ec.RowNum = 1;
+
+	-- INSERTING NEW RECORDS INTO TARGET TABLE
+	INSERT INTO [$(OdsDbName)].cxsus.EmergencyCare
+		(EmergencyCareId
 		,SourceSystemKey
 		,ProviderCode
 		,[Provider]
@@ -768,7 +772,8 @@ SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 		,UpdateUser
 		,UpdateTime
         ,RecordVersion)
-	VALUES ( SOURCE.EmergencyCareId
+	OUTPUT 'Insert' INTO @SummaryOfChanges
+	SELECT   SOURCE.EmergencyCareId
 			,SOURCE.SourceSystemKey
 			,SOURCE.ProviderCode
 			,SOURCE.[Provider]
@@ -931,11 +936,16 @@ SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 			,@InsertUpdateTime
 			,@InsertUpdateUser
 			,@InsertUpdateTime
-			,SOURCE.RecordVersion)
+			,SOURCE.RecordVersion
+	FROM #SOURCE AS SOURCE
+	WHERE NOT EXISTS (	SELECT 1
+						FROM [$(OdsDbName)].cxsus.EmergencyCare AS TARGET
+						WHERE SOURCE.EmergencyCareId = TARGET.EmergencyCareId
+						AND SOURCE.ProviderCode = TARGET.ProviderCode); 
+
     -- Handle updates using RecordVersion
-	WHEN MATCHED
-    AND SOURCE.RecordVersion <> TARGET.RecordVersion THEN
-    UPDATE SET TARGET.SourceSystemKey									 	= SOURCE.SourceSystemKey
+	UPDATE TARGET	
+			SET TARGET.SourceSystemKey									 	= SOURCE.SourceSystemKey
 			,TARGET.[Provider]											 	= SOURCE.[Provider]
 			,TARGET.DepartmentTypeCode									 	= SOURCE.DepartmentTypeCode
 			,TARGET.DepartmentType										 	= SOURCE.DepartmentType
@@ -1095,17 +1105,32 @@ SELECT	 CDS_Unique_Identifier AS EmergencyCareId
 			,TARGET.UpdateUser											 	= @InsertUpdateUser
 			,TARGET.UpdateTime											 	= @InsertUpdateTime
 			,TARGET.RecordVersion										 	= SOURCE.RecordVersion
-	-- Set deleted rows from source to inactive. Data older than 24 months will not be resent, so do not set not inactive
-	WHEN NOT MATCHED BY SOURCE
-    AND TARGET.IsActive = 1
-	AND TARGET.DepartureDate > @24MonthsAgo	THEN
-	UPDATE SET TARGET.UpdateUser	= @InsertUpdateUser
-			  ,TARGET.UpdateTime	= @InsertUpdateTime
-			  ,TARGET.IsActive		= 0
-              ,TARGET.RecordVersion = 0
-	OUTPUT $ACTION INTO @SummaryOfChanges;
+			OUTPUT 'Update' INTO @SummaryOfChanges
+			FROM [$(OdsDbName)].cxsus.EmergencyCare AS TARGET
+			INNER JOIN #SOURCE AS SOURCE
+				ON SOURCE.EmergencyCareId = TARGET.EmergencyCareId
+				AND SOURCE.ProviderCode = TARGET.ProviderCode
+			WHERE SOURCE.RecordVersion <> TARGET.RecordVersion
+
+	-- UPDATING TARGET TABLE FOR RECORDS NOT IN SOURCE
+	UPDATE TARGET
+	SET TARGET.UpdateUser	= @InsertUpdateUser
+	,TARGET.UpdateTime		= @InsertUpdateTime
+	,TARGET.IsActive		= 0
+	,TARGET.RecordVersion	= 0
+	OUTPUT 'Update' INTO @SummaryOfChanges
+	FROM [$(OdsDbName)].cxsus.EmergencyCare AS TARGET
+	WHERE NOT EXISTS (	SELECT 1
+						FROM #SOURCE AS SOURCE
+						WHERE SOURCE.EmergencyCareId = TARGET.EmergencyCareId
+						AND SOURCE.ProviderCode = TARGET.ProviderCode)
+	AND TARGET.IsActive = 1
+	AND TARGET.DepartureDate > @24MonthsAgo;
+
+	COMMIT TRANSACTION;
 
 END TRY
+
 BEGIN CATCH
 	SELECT	 @EndTime = SYSDATETIME()
 			,@ErrorMessage = ERROR_MESSAGE();
