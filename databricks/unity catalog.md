@@ -34,6 +34,9 @@ There are two kinds of compute in Databricks:
 3. **Assign Access Connector to Databricks**  
     - Visit [accounts.azuredatabricks.net/data](https://accounts.azuredatabricks.net/data).
     - Create a catalog and assign the metastore to Databricks workspaces.
+4. ** Adding to unity Catalog **
+    - ucmetastore@diisunitycatalog.dfs.core.windows.net/
+    - 
 
 ---
 

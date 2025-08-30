@@ -1,0 +1,54 @@
+bundle:
+  name: etl_bundle
+
+# Single workspace for all targets
+workspace:
+  host: https://adb-1234567890.5.azuredatabricks.net
+  # Keep code for each target isolated under /Shared/.bundle/<target>/etl_bundle
+  root_path: /Shared/.bundle/${bundle.target}/${bundle.name}
+
+include:
+  - notebooks/
+  - resources/
+
+# One target per environment/catalog
+targets:
+  # Personal sandboxes (small/cheap clusters)
+  sihan_dev:
+    mode: development
+    default: true
+    environment:
+      catalog: sihan_dev
+      diisengineers: diisdevelopers
+      cluster_spark_version: 14.3.x-scala2.12
+      cluster_node_type: Standard_DS3_v2
+      num_workers: 1  # tiny sandbox
+
+  rahul_dev:
+    mode: development
+    environment:
+      catalog: rahul_dev
+      diisengineers: diisdevelopers
+      cluster_spark_version: 14.3.x-scala2.12
+      cluster_node_type: Standard_DS3_v2
+      num_workers: 1
+
+  main_dev:
+    mode: development
+    environment:
+      catalog: main_dev
+      diisengineers: diisdevelopers
+      cluster_spark_version: 14.3.x-scala2.12
+      cluster_node_type: Standard_DS3_v2
+      num_workers: 2
+
+  # Shared prod (bigger cluster)
+  prod:
+    mode: production
+    # (root_path stays /Shared/.bundle/prod/etl_bundle via top-level pattern)
+    environment:
+      catalog: prod
+      diisengineers: diisdevelopers
+      cluster_spark_version: 14.3.x-scala2.12
+      cluster_node_type: Standard_E8d_v4
+      num_workers: 4
