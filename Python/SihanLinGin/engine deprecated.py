@@ -3,7 +3,7 @@ import yaml
 from pyvis.network import Network
 
 # Load YAML
-with open("lineage.yaml", "r") as f:
+with open("SihanPro.yaml", "r") as f:
     config = yaml.safe_load(f)
 
 pipelines = config["pipelines"]
@@ -38,13 +38,15 @@ for pipeline in pipelines:
         net.add_node(tgt, label=tgt, color=node_color(tgt))
 
         # Add trigger as separate node (optional)
-        trigger_node = f"{pipeline['name']}::{trigger}"  # unique name
-        net.add_node(trigger_node, label=trigger, color="red", shape="box")
-
-        # Connect src -> trigger -> tgt
-        net.add_edge(src, trigger_node, title=f"Pipeline: {pipeline['name']}")
-        net.add_edge(trigger_node, tgt, title=f"Pipeline: {pipeline['name']}")
+        if trigger:
+            trigger_node = f"{pipeline['name']}::{trigger}"  # unique name
+            net.add_node(trigger_node, label=trigger, color="red", shape="box")
+            # Connect src -> trigger -> tgt
+            net.add_edge(src, trigger_node, title=f"Pipeline: {pipeline['name']}")
+            net.add_edge(trigger_node, tgt, title=f"Pipeline: {pipeline['name']}")
+        else:
+            net.add_edge(src, tgt, title=f"Pipeline: {pipeline['name']}")
 
 # Save and display
 net.save_graph("lineage.html")
-st.components.v1.html(open("lineage.html", "r").read(), height=700)
+st.components.v1.html(open("lineage.html", "r").read())

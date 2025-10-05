@@ -5,7 +5,6 @@ pipelines:
         via: raw_patient_trigger
         to: Staging_tbl1
       - from: Staging_tbl1
-        via: raw_patient_trigger
         to: ODS_tbl1
 
   - name: dw_load_pipeline
@@ -14,7 +13,6 @@ pipelines:
         via: dw_load_trigger
         to: Gold_tbl1
       - from: Gold_tbl1
-        via: dw_load_trigger
         to: dbo.Patients
 
   - name: finance_pipeline
@@ -26,5 +24,4 @@ pipelines:
         via: finance_dw_load
         to: ODS_Finance
       - from: ODS_Finance
-        via: finance_dw_load
         to: Gold_Finance

@@ -1,0 +1,11 @@
+# SIHAN Data Lineage Engine is a yaml way of writing data pipeline
+# current working version is enginev2copy.py
+
+"""
+now the important part is
+SihanLinGinApp.py is working and I can switch between pages. 
+I have used a layout.py to create a common layout for all pages
+tableSearch.py is the main page that shows the table lineage graph based on selected gold table
+trigger_lineage.py is a placeholder for future trigger lineage graph page.
+
+"""
