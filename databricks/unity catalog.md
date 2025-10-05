@@ -34,9 +34,6 @@ There are two kinds of compute in Databricks:
 3. **Assign Access Connector to Databricks**  
     - Visit [accounts.azuredatabricks.net/data](https://accounts.azuredatabricks.net/data).
     - Create a catalog and assign the metastore to Databricks workspaces.
-4. ** Adding to unity Catalog **
-    - ucmetastore@diisunitycatalog.dfs.core.windows.net/
-    - 
 
 ---
 
@@ -175,31 +172,35 @@ SELECT * FROM another_data_source;
 
 ## Delta Live Table
 
-1. Create a Streaming view of Source Data
-2. Create a Streaming Table of Streaming View
-3. Create Materialized View of Gold Layer
+1. Create a Streaming Table of Source Data
+2. Create a Mat view of Streaming table
+3. Create Mat View of Gold Layer
+
+# streaming table - dlt.table + readStream
+# Mat View - dlt.table + read
+
 
 Only the Materialised view will have data read stats at the end, 
 becz two tables before only reads delta data meaning append only data..
 
-Another Scene
-New DLT Pipeline
+Another Scene WRONG Intentionally
+New DLT Pipeline 
+(This will not work bcz streaming data would not read same load again however mat view will read the same data again and mat  )
 
-Source 1       Strm Table
-            >              >  Mat View    > Strm Table
+
+Source 1 >     Strm Table
+            >              >  Mat View    > Mat View
 Source 2 >     Strm Table
 
 
-## Delta Live Table Example: Bronze Streaming Table
-
+## Delta Live Table Example: Bronze Streaming Table (WRONG example)
 Below is an example of a DLT Python pipeline that creates a Bronze streaming table for customer data. This uses the `@dlt.table` decorator to define a streaming table.
 
 ```python
 import dlt
 from pyspark.sql.functions import col
 
-# streaming table - dlt.table + readStream
-# Mat View - dlt.tab;e + read
+
 # 
 # You cannot create streaming table of Mat View
 # streaming table
@@ -252,6 +253,111 @@ def silver_customers():
 - Replace the path `/mnt/source-data/customers/` with your actual data location.
 - This table ingests raw customer data as a streaming source into the Bronze layer.
 - You can use this as the first step in your medallion architecture pipeline.
+
+
+## Delta Live Table Example: Fixing with Appened Flow Streaming Table
+
+I told you earlier that this pipeline would generate incorrect data and would insert the same data again and again everytime we would run the solution.
+
+**Lets fix it**
+
+
+```python
+import dlt
+from pyspark.sql.functions import col
+
+# create the source tables. Two of them.
+@dlt.table(
+    name="bronze_customers",
+    comment="Bronze streaming table for raw customer data."
+)
+def bronze_customers():
+        # Read from a Databricks catalog source table (sample path: catalog.schema.table)
+        df = spark.readStream.table("main.bronze.customers")
+        return df
+
+@dlt.table(
+    name="bronze_customers_new",
+    comment="Bronze streaming table for raw customer data."
+)
+def bronze_customers():
+        # Read from a Databricks catalog source table (sample path: catalog.schema.table)
+        df = spark.readStream.table("main.bronze.customers_new")
+        return df
+
+
+
+# Create the append flow table.
+
+dlt.create_streaming_table("silver_append_flow")
+
+@dlt.append_flow(
+    target = "silver_append_flow"
+)
+
+def put_first_cust():
+    df=spark.readStream.table("LIVE.bronze_customers")
+    return df
+
+
+@dlt.append_flow(
+    target = "silver_append_flow"
+)
+
+def put_sec_cust():
+    df=spark.readStream.table("LIVE.bronze_customers_new")
+    return df
+
+
+# Streaming table - Gold
+
+@dlt.table(
+    name="gold_customers",
+    comment="Silver materialized view combining both bronze customer tables."
+)
+def gold_customers():
+
+    df = spark.readStream.table("LIVE.silver_append_flow")
+    return df
+
+# So you will see we are using readStream for all these above cases! why??? it's because we want to make sure we only read the new data not all the data.
+
+#this concept is called idempotation
+
+```
+
+
+## Make table loading dynamic
+
+```
+
+# first of all you need to go to the DLT workflow and set the variable using configure
+
+# then import the variable into it notebook using the follow code
+
+
+myvar=spark.conf.get("p_names")
+
+myvar_list = myvar.split(",")
+
+# lets chage the third part of the code which created gold table. We are using for loop. Three tables will be created for different names
+
+
+# Streaming table - Gold
+
+for j,i in enumerate(myvar_list):
+    @dlt.table(
+        name=f"gold_customers_{i}"
+    )
+    def gold_customers():
+
+        df = spark.readStream.table("LIVE.silver_append_flow")
+        df=df.filter(df.name =={i})
+        return df
+
+# this will create three tables for three types of 
+```
+
 
 
 
