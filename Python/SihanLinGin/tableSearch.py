@@ -79,11 +79,11 @@ related_edges = find_related_edges(selected_table)
 for e in related_edges:
     src, tgt, trig = e["from"], e["to"], e.get("via")
     net.add_node(src, label=src, color=node_color(src))
-    net.add_node(tgt, label=tgt, color=node_color(tgt))
+    net.add_node(tgt, label=tgt, title="something new", color=node_color(tgt)) # this something new will later on be replaced by trigger and load details
 
     if trig:
         trig_node = f"{trig}"
-        net.add_node(trig_node, Lable=trig, color="red", shape="box")
+        net.add_node(trig_node, label=trig, color="red", shape="box")
         net.add_edge(src, trig_node, title=f"Pipeline Step")
         net.add_edge(trig_node, tgt, title=f"Pipeline Step")
     else:
