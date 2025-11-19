@@ -33,6 +33,16 @@ SELECT dp.name, dp.type_desc, p.permission_name, p.state_desc, o.name AS ObjectN
 FROM sys.database_permissions p
 JOIN sys.database_principals dp ON p.grantee_principal_id = dp.principal_id
 LEFT JOIN sys.objects o ON p.major_id = o.object_id
-WHERE dp.name = 'AAD-SQL-Readers';
+
+-- To see database role members
+SELECT roles.principal_id AS RolePrincipalID,
+    roles.name AS RolePrincipalName,
+    database_role_members.member_principal_id AS MemberPrincipalID,
+    members.name AS MemberPrincipalName
+FROM sys.database_role_members AS database_role_members
+INNER JOIN sys.database_principals AS roles
+    ON database_role_members.role_principal_id = roles.principal_id
+INNER JOIN sys.database_principals AS members
+    ON database_role_members.member_principal_id = members.principal_id;
 
 

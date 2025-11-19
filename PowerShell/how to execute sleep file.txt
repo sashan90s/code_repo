@@ -1,0 +1,2 @@
+Create a shortcut with 
+powershell.exe -ExecutionPolicy Bypass -NoExit -File "C:\Users\sibbir.sihan\OneDrive - NHS Dorset\Desktop\no sleep.ps1"
