@@ -1,0 +1,127 @@
+import streamlit as st
+import yaml
+from pyvis.network import Network
+from layout import app_layout
+
+# --- Load YAML ---
+with open("SihanProAdvanced.yaml", "r") as f:
+    config = yaml.safe_load(f)
+pipelines = config["pipelines"]
+
+# --- Extract all nodes and gold tables ---
+all_edges = []
+for p in pipelines:
+    all_edges.extend(p["edges"])
+
+all_targets = [edge["to"] for edge in all_edges]
+gold_tables = [t for t in all_targets if "gold" in t.lower() or "dbo" in t.lower()]
+
+# --- Streamlit UI ---
+def content():
+    st.session_state["selected_table"] = st.selectbox(
+        "Select a Gold Table to Explore:",
+        sorted(set(gold_tables)),
+        key="gold_table_select"
+    )
+
+app_layout(content)
+st.session_state["selectedRubber"]=st.selectbox("select a rubber option:",["Active Rubber","Inactive Rubber"])
+selected_rubber=st.session_state["selectedRubber"]=="Active Rubber"
+
+# --- Helper to color by layer ---
+def node_color(name):
+    if name.lower().startswith("blob"):
+        return "lightblue"
+    elif "staging" in name.lower():
+        return "orange"
+    elif "ods" in name.lower():
+        return "lightgreen"
+    elif "gold" in name.lower():
+        return "gold"
+    elif "vw" in name.lower() or "dbo" in name.lower():
+        return "violet"
+    else:
+        return "gray"
+
+# --- Build graph filtered by selected gold table ---
+net = Network(directed=True, height="850px", width="100%", bgcolor="white", font_color="black")
+# this will help drag node and keep it there
+net.toggle_physics(selected_rubber)
+# net.hrepulsion(node_distance=100, central_gravity=0.1, spring_length=70, spring_strength=0.05, damping=1.00)
+
+#useless portion of the code but might be useful later
+# net.set_options("""
+# {
+#   "layout": {
+#     "improvedLayout": true
+#   },
+#   "physics": {
+#     "enabled": true,
+#     "stabilization": false,
+#     "hrepulsion": {
+#       "centralGravity": 0.0,
+#       "nodeDistance": 250,
+#       "springLength": 200,
+#       "springConstant": 0.01,
+#       "damping": 0.09
+#     }
+#   },
+#   "interaction": {
+#     "dragNodes": true
+#   }
+# }
+# """)
+
+
+
+
+
+# Find all edges that are connected (directly or indirectly) to selected_table
+def find_related_edges(target):
+    """
+    Traverses upstream in lineage graph to find all edges
+    that eventually feed into the given target table.
+    Supports multiple parent nodes (fan-in).
+    """
+    related = []
+    visited = set()          # this keeps track of what we have already visited
+    current_targets = {target}
+
+    while current_targets:
+        new_targets = set()
+
+        for e in all_edges:
+            src = e["from"]
+            tgt = e["to"]
+
+            # if this edge feeds one of the current targets
+            if tgt in current_targets and (src, tgt) not in visited:
+                related.append(e)
+                new_targets.add(src)
+                visited.add((src, tgt))
+
+        # go one layer further upstream / or go on layer above the current level
+        current_targets = new_targets
+
+    return related
+
+selected_table = selected_table = st.session_state["selected_table"]
+related_edges = find_related_edges(selected_table)
+
+# Add nodes/edges to graph
+for e in related_edges:
+    src, tgt, trigger = e["from"], e["to"], e.get("via")
+    net.add_node(src, label=src, color=node_color(src))
+    net.add_node(tgt, label=tgt, title="something new", color="yellow", shape = "ellipse") # this something new will later on be replaced by trigger and load details
+
+    if trigger:
+        trig_node = f"{trigger}"
+        net.add_node(trig_node, label=trigger, color="red", shape="box")
+        net.add_edge(src, trig_node, title=f"Pipeline Step")
+        net.add_edge(trig_node, tgt, title=f"Pipeline Step")
+    else:
+        net.add_edge(src, tgt, title=f"Pipeline Step")
+
+# --- Show the graph ---
+net.save_graph("filtered_dlin.html")
+st.components.v1.html(open("filtered_dlin.html", "r").read(), height=850)

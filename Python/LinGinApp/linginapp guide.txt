@@ -1,0 +1,19 @@
+1. Install python 3.12.3 or above
+2. Install VS code
+3. Pull the repo from azure devops
+4. cd DiisDataEngineering\DiisDataEngineering\LinGinApp
+4. Create a virtual environment using `py -m venv .venv_lg`.
+    - Activate the virtual environment with `source .venv_lg/bin/activate` (Linux/Mac) or `.venv_lg\Scripts\activate` (Windows).
+5. Once venv activated, installed required packages using `pip install -r requirements.txt`. {if you cannot find the file, ask sibbir sihan}
+6. cd into SihanLinGin and terminal this `streamlit run SihanLinGinApp.py`
+7. To configure the yaml, you need to find SihanProAdvanced.yaml file and edit it. follow instruction on Sibbir Sihan's blog on how to use the yaml pipeline
+   - https://sihandataengineer.blogspot.com/2025/11/data-lineage-app-built-by-sihan.html
+
+
+
+Another way of running this on any computer
+
+1. You have to run this code in your powershell ` powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex" `
+2. check `uv --version`  // this is the fastest way to install python libraries
+3. run `uv sync`
+4. open vscode and 
