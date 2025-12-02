@@ -10,3 +10,25 @@ E:\programming\azure_dataengineering\all codes\code_repo\Python\myenv
 E:/programming/azure_dataengineering/all codes/code_repo/Python/myenv
 C:\Users\sibbir.sihan\SSRepo\Projects\Personal\code_repo\agentic_ai\.venv
 .venv
+E:\programming\azure_dataengineering\all codes\code_repo\webdev\backend\venv
+
+# Python virtual environment
+webdev/backend/venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# SQLite database (if auto-generated for dev/testing)
+webdev/backend/*.db
+
+# Node modules (React/Frontend dependencies)
+webdev/frontend/node_modules/
+
+# Build outputs
+webdev/frontend/dist/
+
+# Environment/config files
+.env
+webdev/backend/.env
+webdev/frontend/.env
